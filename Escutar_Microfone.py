@@ -76,6 +76,7 @@ def imitar_fala():
 
                 if not boca_aberta:
                     servo_angle = boca_min_pos
+
                 else:
                     #normalizar volume do som entre 0.0 e 1.0
                     normalised_volume = min(rms / max_volume, 1.0)
@@ -85,6 +86,10 @@ def imitar_fala():
                 angulo_suavizado = ALPHA * servo_angle + (1 - ALPHA) * angulo_anterior
                 angulo_anterior = angulo_suavizado
                 angulo_final = int(round(angulo_suavizado))
+
+                if angulo_final < 60:
+                    angulo_final = 40
+                    boca_aberta = False
 
                 print(f"RMS: {rms:.1f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
