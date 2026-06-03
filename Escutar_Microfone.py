@@ -26,7 +26,7 @@ def imitar_fala():
     boca_min_pos = 40
     boca_max_pos = 140
 
-    THRESHOLD_ABRIR  = 2400
+    THRESHOLD_ABRIR  = 2100
     THRESHOLD_FECHAR = 2000
     ALPHA = 0.4
 
@@ -87,7 +87,7 @@ def imitar_fala():
                 angulo_anterior = angulo_suavizado
                 angulo_final = int(round(angulo_suavizado))
 
-                if angulo_final < 60:
+                if angulo_final < 63:
                     angulo_final = 40
                     boca_aberta = False
 
