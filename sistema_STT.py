@@ -1,9 +1,21 @@
-import speech_recognition as sr
 from groq import Groq as grq
 import os
 import json
 from dotenv import load_dotenv
 import time
+#suprimir mensagens de erros do ALSA
+from ctypes import cdll, CFUNCTYPE, c_char_p, c_int
+_alsa_handler_ref = None
+
+try:
+    _HANDLER_TYPE = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+    _alsa_handler_ref = _HANDLER_TYPE(lambda *_: None)  # guardado na global
+    cdll.LoadLibrary('libasound.so.2').snd_lib_error_set_handler(_alsa_handler_ref)
+except Exception:
+    pass
+
+#continua normalmente
+import speech_recognition as sr
 
 load_dotenv()
 
@@ -18,6 +30,7 @@ def criar_wav():
             recognizer.pause_threshold=2
             recognizer.energy_threshold=100
             try:
+                print("Ouvindo microfone...\n\n")
                 audio_data = recognizer.listen(mic,TIMEOUT_AUDIO,TEMPO_MAXIMO_FALA)
 
                 wav_bytes = audio_data.get_wav_data()
@@ -25,9 +38,9 @@ def criar_wav():
                 with open("audio_output.wav","wb") as file:
                     file.write(wav_bytes)
 
-                print(f"arquivo criado. Threshold foi: {recognizer.energy_threshold}")
+                print(f"arquivo criado. Threshold foi: {recognizer.energy_threshold}\n\n\n")
             except Exception as e:
-                print(f"Um erro ocorreu: {e}\nThreshold foi: {recognizer.energy_threshold}")
+                print(f"Um erro ocorreu: {e}\nThreshold foi: {recognizer.energy_threshold}\n\n\n")
                 
 
     except sr.WaitTimeoutError:
