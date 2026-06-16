@@ -1,17 +1,16 @@
 #import live_mouth as LM
-from TTS_e_STT import sistema_STT as STT
-from IA import chamar_IA as IA
-from TTS_e_STT import sistema_TTS as TTS
-import falar_audio as dublar
+from ai import llm as IA
+from translators import text_to_speech as TTS
+from translators import speech_to_text as STT
+from animation import falar_audio as dublar
 
-#live mouth comentado para evitar erros
+#live mouth removido por enquanto para evitar erros
 
 while True:
     escolha=input("Oque deseja usar?\n\n1- Boca ao vivo\n2- Perguntar IA\n\nEscolha (1/2): ")
     if escolha == "1":
         try:
-            #LM.imitar_fala() removido por enquanto para suprimir mensagens de erro
-            pass
+            pass #removido por enquanto para lidar com mensagens de erro depois
         except KeyboardInterrupt:
             continue
     else:
