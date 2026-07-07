@@ -4,3 +4,4 @@ __pycache__/
 audios/
 logs/*
 !logs/log_writer.py
+ai/prompts
