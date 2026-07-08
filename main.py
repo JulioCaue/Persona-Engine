@@ -3,9 +3,13 @@ from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
 from animation import falar_audio as dublar
 from animation import falar_mic
+from audios import audio_player
 from ai import history
 import subprocess
 import os
+import serial
+
+arduino_conectado = True
 
 while True:
     subprocess.run('cls' if os.name == 'nt' else 'clear')
@@ -18,24 +22,37 @@ while True:
 
     else:
         while True:
-            escolha_tipo = input("Escolha 1 para conversa por voz ou 2 para conversa por texto")
+            escolha_tipo = input("Escolha 1 para conversa por voz ou 2 para conversa por texto: ")
             try:
-                if int(escolha_tipo) == 1:
-                    history.add_input_to_history(STT.pegar_transcricao())
+                escolha_tipo = int(escolha_tipo)
+                if escolha_tipo not in (1,2):
+                    print("Escolha apenas 1 ou 2")
+                    continue
+                else: 
                     break
-                elif int(escolha_tipo) == 2:
-                    history.add_input_to_history(input("Digite algo: "))
-                    break
-                else:
-                    pass
             except ValueError:
+                print("Apenas numeros")
                 pass
             except Exception as e:
                 print(f"Um erro ocorreu: {e}")
 
-        try:
-            TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
-            dublar.dublar_audio()
 
-        except KeyboardInterrupt:
-            continue
+        while True:
+            if int(escolha_tipo) == 1:
+                history.add_message_to_history(STT.pegar_transcricao(),"user")
+
+            elif int(escolha_tipo) == 2:
+                history.add_message_to_history(input("\n\nDigite algo: "),"user")
+
+            try:
+                TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
+                audio_player.Tocar_Wav()
+                try:
+                    if arduino_conectado:
+                        dublar.dublar_audio()
+                except serial.SerialException:
+                    arduino_conectado = False
+                    continue
+
+            except KeyboardInterrupt:
+                break
