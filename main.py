@@ -55,14 +55,15 @@ def perguntar_ia():
 
         try:
             TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
-            audio_player.Tocar_Wav()
             #O movimento da cabeça é idenpendente, então pode ser opcional.
-            try:
-                if arduino_conectado:
-                    dublar.dublar_audio()
-            except serial.SerialException:
-                arduino_conectado = False
-                continue
+
+            audio_player.Tocar_Wav()
+            if arduino_conectado:
+                try:
+                    if arduino_conectado:
+                        dublar.dublar_audio()
+                except serial.SerialException:
+                    arduino_conectado = False
         
         except Exception as e:
             print(f"Ocorreu um erro: {e}")
@@ -89,7 +90,7 @@ while True:
         if escolha.lower() in ("sair","exit","quit"):
             print("\n\nSaindo...")
             break
-        if escolha not in tipo_interação:
+        if int(escolha) not in tipo_interação:
             subprocess.run('cls' if os.name == 'nt' else 'clear')
             print("Opção invalida.\n")
             continue
