@@ -36,7 +36,7 @@ def criar_wav():
     TEMPO_MAXIMO_FALA = 30
     try:
         with sr.Microphone() as mic:
-            recognizer.pause_threshold=2
+            recognizer.pause_threshold=TIMEOUT_AUDIO
             recognizer.energy_threshold=60
             try:
                 print("Ouvindo microfone...\n\n")

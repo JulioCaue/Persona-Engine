@@ -32,8 +32,8 @@ def perguntar_ia():
     """
 
 
-    arduino_conectado = True
     while True:
+        arduino_conectado = True
         escolha_tipo = input("Escolha 1 para conversa por voz ou 2 para conversa por texto: ")
         try:
             escolha_tipo = int(escolha_tipo)
@@ -46,24 +46,24 @@ def perguntar_ia():
         except Exception as e:
             print(f"Um erro ocorreu: {e}")
 
-
+    mensagem = tipos_de_mensagem[escolha_tipo]()
     while True:
-        mensagem = tipos_de_mensagem[escolha_tipo]()
         if mensagem.lower() in ("sair","exit","quit"):
             break
         history.add_message_to_history(mensagem,"user")
 
         try:
+            #Da todo o historico para a IA, da a mensagem do usuario ao modelo
+            #E transforma o texto da IA em audio com TTS.
             TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
-            #O movimento da cabeça é idenpendente, então pode ser opcional.
 
-            audio_player.Tocar_Wav()
-            if arduino_conectado:
-                try:
-                    if arduino_conectado:
-                        dublar.dublar_audio()
-                except serial.SerialException:
-                    arduino_conectado = False
+            #O movimento da cabeça é independente, então pode ser opcional.
+            try:
+                if arduino_conectado:
+                    dublar.dublar_audio()
+            except serial.SerialException:
+                arduino_conectado = False
+                audio_player.Tocar_Wav()
         
         except Exception as e:
             print(f"Ocorreu um erro: {e}")

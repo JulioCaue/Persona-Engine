@@ -6,9 +6,9 @@ Usa volume no arquivo wav para criar comandos para os servos.
 
 import librosa
 import numpy as np
-import time
 import serial
 from logs import log_writer
+from audios import audio_player
 
 #suprimir mensagens de erros do ALSA
 from ctypes import cdll, CFUNCTYPE, c_char_p, c_int
@@ -56,6 +56,8 @@ def dublar_audio():
     # --- inicio da conexão ---
     with serial.Serial(PORTA_NOME, BAUD_RATE, timeout=2) as ser:
         print (f"Conectado com arduino na porta {PORTA_NOME}")
+
+        audio_player.Tocar_Wav()
 
         try:
             while frame_start < len(y):
