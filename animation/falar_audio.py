@@ -75,8 +75,6 @@ def dublar_audio():
 
                 frame_start += TAMANHO_CHUNK
 
-        except KeyboardInterrupt:
-            log_writer.write("Encerrado pelo usuário.")
         except Exception as e:
             log_writer.write(f"{e}")
         finally:

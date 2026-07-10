@@ -8,6 +8,7 @@ from ai import history
 import subprocess
 import os
 import serial
+from logs import log_writer
 
 arduino_conectado = True
 
@@ -55,4 +56,10 @@ while True:
                     continue
 
             except KeyboardInterrupt:
+                print("Encerrado pelo usuario.")
                 break
+            
+            except Exception as e:
+                print(f"Ocorreu um erro: {e}")
+                log_writer.write(f"Ocorreu um erro: {e}")
+                

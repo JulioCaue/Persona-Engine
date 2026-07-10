@@ -114,8 +114,6 @@ def imitar_fala():
 
     except serial.SerialException as e:
         log_writer.write(f"Ocorreu um erro ao conectar a porta: {e}")
-    except KeyboardInterrupt:
-        log_writer.write("Encerrado pelo usuário.")
     except Exception as e:
         log_writer.write(f"\n{e}.")
     finally:
