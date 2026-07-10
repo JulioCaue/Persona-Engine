@@ -67,9 +67,9 @@ def receber_STT():
     """
     client = grq(api_key=GROQ_API_KEY,timeout=5)
 
-    filename = os.path.dirname(__file__) + "/audio_input.wav"
+    filepath = "audios/audio_input.wav"
 
-    with open(filename, "rb") as file:
+    with open(filepath, "rb") as file:
         transcription = client.audio.transcriptions.create(
         file=file,
         model="whisper-large-v3-turbo",
