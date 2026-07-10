@@ -46,8 +46,8 @@ def perguntar_ia():
         except Exception as e:
             print(f"Um erro ocorreu: {e}")
 
-    mensagem = tipos_de_mensagem[escolha_tipo]()
     while True:
+        mensagem = tipos_de_mensagem[escolha_tipo]()
         if mensagem.lower() in ("sair","exit","quit"):
             break
         history.add_message_to_history(mensagem,"user")
