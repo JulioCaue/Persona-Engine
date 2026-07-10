@@ -1,3 +1,9 @@
+"""
+Arquivo responsavel por transformar fala do usuario em texto para IA.
+Grava microfone e gera arquivo wav.
+"""
+
+
 from groq import Groq as grq
 import os
 from dotenv import load_dotenv
@@ -21,6 +27,10 @@ load_dotenv()
 GROQ_API_KEY=os.getenv('GROQ_API_KEY')
 
 def criar_wav():
+    """
+    cria wav a partir de audio captado.
+    """
+
     recognizer = sr.Recognizer()
     TIMEOUT_AUDIO = 5
     TEMPO_MAXIMO_FALA = 30
@@ -52,18 +62,17 @@ def criar_wav():
 
 
 def receber_STT():
-    #Inicia cliente groq
+    """
+    Usa wav criado para gerar texto usando API externa. 
+    """
     client = grq(api_key=GROQ_API_KEY,timeout=5)
 
-    #Caminho pro arquivo de audio
-    filename = os.path.dirname(__file__) + "/audio_input.wav" # nome do arquivo
+    filename = os.path.dirname(__file__) + "/audio_input.wav"
 
-    # Open the audio file
     with open(filename, "rb") as file:
-        #Criar Transcriçao
         transcription = client.audio.transcriptions.create(
-        file=file, # Arquivo de audio
-        model="whisper-large-v3-turbo", # Modelo para transcricao
+        file=file,
+        model="whisper-large-v3-turbo",
         )
         language="pt-BR"
         return transcription.text

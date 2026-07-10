@@ -1,3 +1,11 @@
+"""
+Arquivo principal do projeto.
+
+Serve como local de interação do usuario com o projeto. 
+Coordena as partes porém não as implementa.
+"""
+
+
 from ai import llm as IA
 from ai import history
 from translators import text_to_speech as TTS

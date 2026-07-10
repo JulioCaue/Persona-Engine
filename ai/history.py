@@ -1,9 +1,17 @@
+"""
+Gerencia o historico de conversa com IA. 
+
+Esse arquivo é responsavel por salvar mensagens no historico
+e as retornar no formato esperado para o modelo.
+"""
+
 import json
 import os
 
 local_arquivo = "ai/prompts/conversa/historico.json"
 
 def add_message_to_history(input,origem):
+    """Adiciona mensagem ao arquivo de historico."""
     if not os.path.exists(local_arquivo):
         with open(local_arquivo,"w",encoding="utf-8") as file:
             json.dump([], file, ensure_ascii=False, indent=4)
@@ -19,6 +27,7 @@ def add_message_to_history(input,origem):
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 def pull_history():
+    """retorna historico completo"""
     with open(local_arquivo,"r",encoding="utf-8") as file:
         if file is None:
             return None

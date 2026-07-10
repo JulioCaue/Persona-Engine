@@ -1,3 +1,9 @@
+"""
+Arquivo usado para enviar comandos ao arduino.
+Usa volume no arquivo wav para criar comandos para os servos.
+"""
+
+
 import librosa
 import numpy as np
 import time
@@ -19,6 +25,10 @@ except Exception:
 import pyaudio
 
 def dublar_audio():
+    """
+    Criar angulos e os enviar para arduino.
+    """
+
     # --- variaveis para serial ---
     PORTA_NOME = "/dev/ttyUSB0"
     BAUD_RATE = 115200
@@ -61,6 +71,7 @@ def dublar_audio():
                 if np.isnan(rms):
                     rms = 0.0
 
+                #suaviza o angulo atual para movimentos menos brutos
                 angulo_calculado = boca_min_pos + (rms / RMS_MAX) * (boca_max_pos - boca_min_pos)
                 angulo_suavizado = ALPHA * angulo_calculado + (1 - ALPHA) * angulo_anterior
                 angulo_anterior = angulo_suavizado
@@ -71,6 +82,7 @@ def dublar_audio():
                 print(f"RMS: {rms:.4f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
                 stream.write(chunk_audio.astype(np.float32).tobytes())
+                # envia movimento na ordem boca > olho direito > olho esquerdo > palpebra
                 ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
 
                 frame_start += TAMANHO_CHUNK
