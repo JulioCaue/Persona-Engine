@@ -31,7 +31,7 @@ def imitar_fala():
     """
 
     #limite dos servos:
-    # boca: 120, 40
+    # boca: 170, 40
     # olhos: 150 (esquerda), 35 (direita)
     # palpebras: 160 (abertas), 40 (fechada)
 
@@ -43,11 +43,10 @@ def imitar_fala():
     RATE = 16000
 
     boca_min_pos = 40
-    boca_max_pos = 140
+    boca_max_pos = 170
 
-    THRESHOLD_ABRIR  = 2100
-    THRESHOLD_FECHAR = 2000
-    ALPHA = 0.4
+    THRESHOLD_ABRIR  = 140
+    ALPHA = 0.15
 
     angulo_anterior = float(boca_min_pos)
     boca_aberta = False
@@ -87,11 +86,11 @@ def imitar_fala():
 
                     # -- logica de mapeamento --
                     #ajustar o volume maximo dependendo da sensibilidade do microfone
-                    max_volume = 8000.0
+                    max_volume = 250.0
 
                     if not boca_aberta and rms >= THRESHOLD_ABRIR:
                         boca_aberta = True
-                    elif boca_aberta and rms < THRESHOLD_FECHAR:
+                    else:
                         boca_aberta = False
 
                     if not boca_aberta:
@@ -107,20 +106,17 @@ def imitar_fala():
                     angulo_anterior = angulo_suavizado
                     angulo_final = int(round(angulo_suavizado))
 
-                    if angulo_final < 63:
-                        angulo_final = 40
-                        boca_aberta = False
-
                     print(f"RMS: {rms:.1f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
+                    # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
                     ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
 
 
                     if time.time() >= proxima_limpesa:
                         subprocess.run('cls' if os.name == 'nt' else 'clear')
                         proxima_limpesa = time.time() + intervalo_limpesa
-
-                    time.sleep(0.025)
+                    
+                    time.sleep(0.015)
                 except KeyboardInterrupt:
                     break
 

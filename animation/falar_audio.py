@@ -82,7 +82,7 @@ def dublar_audio():
                 print(f"RMS: {rms:.4f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
                 stream.write(chunk_audio.astype(np.float32).tobytes())
-                # envia movimento na ordem boca > olho direito > olho esquerdo > palpebra
+                # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
                 ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
 
                 frame_start += TAMANHO_CHUNK
