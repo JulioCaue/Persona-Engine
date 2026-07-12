@@ -1,0 +1,17 @@
+/* estilo base do sinalizador */
+.status-dot {
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    background-color: #FF0019;
+}
+/* Estado ativo: cor verde */
+.ativo {
+    background-color: #28a745;
+}
+/* Estado desativado: cor vermelha */
+.desativado {
+    background-color: #FF0019;
+}

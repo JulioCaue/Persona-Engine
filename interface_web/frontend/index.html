@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="color-scheme" content="light dark">
+        <title>Interface Persona</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <header>
+            <h1>Interface Web Para Projeto Persona</h1>
+            <div class="status-container">
+                <span class="status-dot"></span>
+                <span>Status IA</span>
+            </div>
+            <div class="status-container">
+                <span class="status-dot"></span>
+                <span>Arduino</span>
+            </div>
+        </header>
+        <main>
+            <section>
+                <h2>Controle</h2>
+
+                <label for="modo">Modo de operação:
+                <select id="modo" onchange="mostrarOpcoes()">
+                    <option value="">Selecione...</option>
+                    <option value="Imitar Fala">Imitar Fala</option>
+                    <option value="Conversa por Fala">Conversa por Microfone</option>
+                    <option value="Conversa por Texto">Conversa por Texto</option>
+                </select>
+            </section>
+        </main>
+        <footer></footer>
+    </body>
+</html>
