@@ -6,6 +6,7 @@
         <meta name="color-scheme" content="light dark">
         <title>Interface Persona</title>
         <link rel="stylesheet" href="style.css">
+        <script src="script.js" defer></script>
     </head>
     <body>
         <header>
@@ -22,9 +23,8 @@
         <main>
             <section>
                 <h2>Controle</h2>
-
                 <label for="modo">Modo de operação:
-                <select id="modo" onchange="mostrarOpcoes()">
+                <select id="modo">
                     <option value="">Selecione...</option>
                     <option value="Imitar Fala">Imitar Fala</option>
                     <option value="Conversa por Fala">Conversa por Microfone</option>
@@ -32,6 +32,5 @@
                 </select>
             </section>
         </main>
-        <footer></footer>
     </body>
 </html>
