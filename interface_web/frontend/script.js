@@ -2,15 +2,15 @@ const listaModos = document.getElementById("modo")
 
 listaModos.addEventListener("change",(event) => {
     switch (event.target.value){
-        case("Imitar Fala"):
+        case("1"):
             console.log("Imitar Fala");
             break;
 
-        case("Conversa por Fala"):
+        case("2"):
             console.log("Conversa por Fala");
             break;
 
-        case("Conversa por Texto"):
+        case("3"):
             console.log("Conversa por Texto");
             break;
     }
