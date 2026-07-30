@@ -1,18 +1,29 @@
 const listaModos = document.getElementById("modo")
+url = "http://127.0.0.1:8000/controle";
 
-listaModos.addEventListener("change",(event) => {
-    switch (event.target.value){
-        case("1"):
-            console.log("Imitar Fala");
-            break;
+async function trocarModo(event) {
+    const modoEscolhido = event.target.value;
 
-        case("2"):
-            console.log("Conversa por Fala");
-            break;
+    if ([1,2,3].includes(Number(modoEscolhido))){
+        try{
+            const resposta = await fetch(url,{
+                method:"POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    modo: modoEscolhido
+                })
+            });
+            
+            const resultado = await resposta.json();
 
-        case("3"):
-            console.log("Conversa por Texto");
-            break;
+            console.log(resultado)
+        } catch(erro){
+            console.error("Erro enviando data: ",erro);
+        }
     }
+}
 
-})
+
+listaModos.addEventListener("change",trocarModo);
