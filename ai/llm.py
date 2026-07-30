@@ -6,12 +6,11 @@ Pode configurar os parametros da comunicação.
 from ollama import chat
 from ai import history
 
-with open("ai/prompts/sistema.txt",'r') as f:
-  prompt_sistema = f.read()
-
 
 def perguntar_ia(historico):
   """Envia prompt para IA."""
+  with open("ai/prompts/sistema.txt",'r') as f:
+    prompt_sistema = f.read()
   mensagem_final = ""
   resposta = chat(
     model='qwen3:1.7b',

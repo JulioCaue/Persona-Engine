@@ -13,4 +13,5 @@ def write(error_line):
     hora_agora = agora.strftime("%H:%M:%S")
 
     with open(f"{caminho_pastas}{dia_hoje}{ftype}","a") as file:
-        file.write(f"[{hora_agora}]: {error_line}\n")
+        if error_line not in file:
+            file.write(f"[{hora_agora}]: {error_line}\n")
