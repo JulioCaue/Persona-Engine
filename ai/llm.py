@@ -5,12 +5,19 @@ Pode configurar os parametros da comunicação.
 
 from ollama import chat
 from ai import history
+from logs import log_writer
+import os
 
 
 def perguntar_ia(historico):
   """Envia prompt para IA."""
-  with open("ai/prompts/sistema.txt",'r') as f:
-    prompt_sistema = f.read()
+  caminho_arquivo = "ai/prompts/sistema.txt"
+  if os.path.exists(caminho_arquivo):
+    with open(caminho_arquivo,'r') as f:
+      prompt_sistema = f.read()
+  else: 
+    prompt_sistema = ""
+    log_writer.write(__name__,"Arquivo de prompt do sistema não foi encontrado.")
   mensagem_final = ""
   resposta = chat(
     model='qwen3:1.7b',

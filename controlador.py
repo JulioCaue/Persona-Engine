@@ -54,9 +54,7 @@ def executar_modo(
 
             #Mensagens extras para tentar evitar problema visto no historico
             #Talvez seja melhor criar um arquivo de lista negra?
-            if mensagem.lower() in ("sair","exit","quit"," thank you.", " ."):
-                if not mensagem:
-                    print("Mensagem do usuario retornou como vazia.")
+            if mensagem.lower() in ("sair","exit","quit"," thank you.", " .") or not mensagem:
                 break
 
             #Coloca mensagem do usuario no historico
@@ -74,8 +72,9 @@ def executar_modo(
                 if arduino_conectado:
                     dublar.dublar_audio()
 
-                #Toca o arquivo wav criado se o arquivo existir.
-                audio_player.Tocar_Wav()
+                else:
+                    #Toca o arquivo wav criado se o arquivo existir.
+                    audio_player.Tocar_Wav()
             
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")

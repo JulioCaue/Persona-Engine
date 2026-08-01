@@ -28,8 +28,8 @@ def add_message_to_history(input,origem):
 
 def pull_history():
     """retorna historico completo"""
-    with open(local_arquivo,"r",encoding="utf-8") as file:
-        if file is None:
-            return None
-        else:
+    if os.path.exists(local_arquivo):
+        with open(local_arquivo,"r",encoding="utf-8") as file:
             return json.load(file)
+    else:
+        return None

@@ -1,15 +1,7 @@
 from datetime import datetime
 import os
 
-caminho_pastas = "logs/errors/"
-ftype = ".txt"
-agora = datetime.now()
-dia_hoje = agora.strftime("%d-%m-%Y")
-hora_agora = agora.strftime("%H:%M")
-
-caminho_arquivo = f"{caminho_pastas}{dia_hoje}{ftype}"
-
-def ler_erros():
+def ler_erros(caminho_arquivo):
     """
     Lê todos os erros no arquivo de erros do dia.
     """
@@ -24,8 +16,16 @@ def write(nome_arquivo,error_line):
     Precisa apenas da linha de erro.
     """
 
+    caminho_pastas = "logs/errors/"
+    ftype = ".txt"
+    agora = datetime.now()
+    dia_hoje = agora.strftime("%d-%m-%Y")
+    hora_agora = agora.strftime("%H:%M")
+
+    caminho_arquivo = f"{caminho_pastas}{dia_hoje}{ftype}"
+
     #garante que variavel exista (e sem \n feio)
-    erros_no_arquivo = ler_erros() if os.path.exists(caminho_arquivo) else ""
+    erros_no_arquivo = ler_erros(caminho_arquivo) if os.path.exists(caminho_arquivo) else ""
 
     #Escreve cada tipo de erro apenas uma vez por minuto.   
     with open(caminho_arquivo,"a") as file:
