@@ -2,12 +2,12 @@
 Arquivo usado para a funcionalidade de imitar a fala ao vivo do microfone do usuario.
 """
 
-
 import serial
 import time
 import numpy as np
 import subprocess
 import os
+import threading
 from logs import log_writer
 
 
@@ -25,7 +25,7 @@ except Exception:
 #continua normalmente
 import pyaudio
 
-def imitar_fala():
+def imitar_fala(parar_modo:threading.Event):
     """
     Envia comandos de servo para arduino com base em volume da voz.
     """
@@ -61,64 +61,59 @@ def imitar_fala():
     )
     try:
         with serial.Serial(PORTA_NOME, BAUD_RATE, timeout=2) as ser:
-            time.sleep(2)
-            print (f"Conectado com arduino na porta {PORTA_NOME}")
-
             print("Microfone ativo. Fale para mover boca... (ctrl + c para parar)")
 
             intervalo_limpesa = 15
             proxima_limpesa = time.time() + intervalo_limpesa
 
-            while True:
-                try:
-                    #ler data binaria do audio da stream do microfone
-                    data = stream.read(CHUNK_SIZE,exception_on_overflow=False)
-                    
-                    #converter data binaria para float para evitar overflow
-                    audio_data=np.frombuffer(data,dtype=np.int16).astype(np.float32)
+            while not parar_modo.is_set():
+                #ler data binaria do audio da stream do microfone
+                data = stream.read(CHUNK_SIZE,exception_on_overflow=False)
+                
+                #converter data binaria para float para evitar overflow
+                audio_data=np.frombuffer(data,dtype=np.int16).astype(np.float32)
 
-                    #computar raiz quadrada media para determinar a amplitude do volume
-                    rms = np.sqrt(np.mean(audio_data**2))
+                #computar raiz quadrada media para determinar a amplitude do volume
+                rms = np.sqrt(np.mean(audio_data**2))
 
-                    #proteçao contra audio silencioso ou corrompido 
-                    if np.isnan(rms):
-                        rms=0.0
+                #proteçao contra audio silencioso ou corrompido 
+                if np.isnan(rms):
+                    rms=0.0
 
-                    # -- logica de mapeamento --
-                    #ajustar o volume maximo dependendo da sensibilidade do microfone
-                    max_volume = 250.0
+                # -- logica de mapeamento --
+                #ajustar o volume maximo dependendo da sensibilidade do microfone
+                max_volume = 250.0
 
-                    if not boca_aberta and rms >= THRESHOLD_ABRIR:
-                        boca_aberta = True
-                    else:
-                        boca_aberta = False
+                if not boca_aberta and rms >= THRESHOLD_ABRIR:
+                    boca_aberta = True
+                else:
+                    boca_aberta = False
 
-                    if not boca_aberta:
-                        servo_angle = boca_min_pos
+                if not boca_aberta:
+                    servo_angle = boca_min_pos
 
-                    else:
-                        #normalizar volume do som entre 0.0 e 1.0
-                        normalised_volume = min(rms / max_volume, 1.0)
-                        #transformar em angulo
-                        servo_angle = int(boca_min_pos + normalised_volume * (boca_max_pos - boca_min_pos))
+                else:
+                    #normalizar volume do som entre 0.0 e 1.0
+                    normalised_volume = min(rms / max_volume, 1.0)
+                    #transformar em angulo
+                    servo_angle = int(boca_min_pos + normalised_volume * (boca_max_pos - boca_min_pos))
 
-                    angulo_suavizado = ALPHA * servo_angle + (1 - ALPHA) * angulo_anterior
-                    angulo_anterior = angulo_suavizado
-                    angulo_final = int(round(angulo_suavizado))
+                angulo_suavizado = ALPHA * servo_angle + (1 - ALPHA) * angulo_anterior
+                angulo_anterior = angulo_suavizado
+                angulo_final = int(round(angulo_suavizado))
 
-                    print(f"RMS: {rms:.1f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
+                print(f"RMS: {rms:.1f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
-                    # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
-                    ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
+                # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
+                ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
 
 
-                    if time.time() >= proxima_limpesa:
-                        subprocess.run('cls' if os.name == 'nt' else 'clear')
-                        proxima_limpesa = time.time() + intervalo_limpesa
-                    
-                    time.sleep(0.015)
-                except KeyboardInterrupt:
-                    break
+                if time.time() >= proxima_limpesa:
+                    subprocess.run('cls' if os.name == 'nt' else 'clear')
+                    proxima_limpesa = time.time() + intervalo_limpesa
+                
+                time.sleep(0.015)
+            return 
 
     except serial.SerialException as e:
         log_writer.write(f"Ocorreu um erro ao conectar a porta: {e}")
