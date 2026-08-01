@@ -90,7 +90,7 @@ def dublar_audio():
                 frame_start += TAMANHO_CHUNK
 
         except Exception as e:
-            log_writer.write(f"{e}")
+            log_writer.write(__name__,e)
         finally:
             stream.stop_stream()
             stream.close()

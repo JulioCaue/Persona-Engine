@@ -78,7 +78,7 @@ def executar_modo(
             
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")
-                log_writer.write(f"Ocorreu um erro: {e}")
+                log_writer.write(__name__,f"Ocorreu um erro: {e}")
 
     #deixando nesse formato para não precisar alterar dicionario de funções.
     else:

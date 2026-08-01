@@ -116,9 +116,9 @@ def imitar_fala(parar_modo:threading.Event):
             return 
 
     except serial.SerialException as e:
-        log_writer.write(f"Ocorreu um erro ao conectar a porta: {e}")
+        log_writer.write(__name__,f"Ocorreu um erro ao conectar a porta: {e}")
     except Exception as e:
-        log_writer.write(f"\n{e}.")
+        log_writer.write(__name__,e)
     finally:
         stream.stop_stream()
         stream.close()

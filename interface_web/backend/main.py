@@ -52,7 +52,7 @@ async def receber_modo(dados: ModoEscolha):
 
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")
-                log_writer.write(f"Ocorreu um erro: {e}")
+                log_writer.write(__name__,f"Ocorreu um erro: {e}")
                 raise HTTPException(
                     status_code=500,
                     detail="Erro interno inesperado"

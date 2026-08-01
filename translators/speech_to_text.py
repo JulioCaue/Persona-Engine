@@ -62,13 +62,13 @@ def pegar_transcricao(parar_modo):
             return texto
 
     except sr.WaitTimeoutError:
-        log_writer.write("Nenhuma fala foi detectada em 5 segundos.")
+        log_writer.write(__name__,"Nenhuma fala foi detectada em 5 segundos.")
 
     except sr.UnknownValueError:
-        log_writer.write("O Google recebeu o áudio, mas não conseguiu entendê-lo.")
+        log_writer.write(__name__,"O Google recebeu o áudio, mas não conseguiu entendê-lo.")
 
     except sr.RequestError as erro:
-        log_writer.write(f"Erro ao acessar o serviço do Google: {erro}")
+        log_writer.write(__name__,f"Erro ao acessar o serviço do Google: {erro}")
 
     except OSError as erro:
-        log_writer.write(f"Erro ao acessar o microfone: {erro}")
+        log_writer.write(__name__,f"Erro ao acessar o microfone: {erro}")

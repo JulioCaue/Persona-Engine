@@ -11,4 +11,4 @@ def Tocar_Wav():
             sample_rate,data = wav.read(local_arquivo_output)
             sd.play(data,sample_rate)
         except Exception as e:
-            log_writer.write(f"Ocorreu um erro ao tocar wav: {e}")
+            log_writer.write(__name__,f"Ocorreu um erro ao tocar wav: {e}")

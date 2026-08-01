@@ -16,7 +16,7 @@ def ler_erros():
     with open(caminho_arquivo,"r") as file:
         return file.read()
 
-def write(error_line):
+def write(nome_arquivo,error_line):
     """
     Salva erros para um arquivo de texto.
     Arquivos de texto diferentes para cada dia.
@@ -27,7 +27,7 @@ def write(error_line):
     #garante que variavel exista (e sem \n feio)
     erros_no_arquivo = ler_erros() if os.path.exists(caminho_arquivo) else ""
 
-    #Escreve cada tipo de erro apenas uma vez por minuto.
+    #Escreve cada tipo de erro apenas uma vez por minuto.   
     with open(caminho_arquivo,"a") as file:
         if f"[{hora_agora}]: {error_line}" not in erros_no_arquivo:
-            file.write(f"[{hora_agora}]: {error_line}\n\n")
+            file.write(f"[{hora_agora}] - Erro no arquivo {nome_arquivo}:\n   {error_line}\n\n")
