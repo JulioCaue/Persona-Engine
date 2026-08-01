@@ -54,14 +54,15 @@ def executar_modo(
 
             #Mensagens extras para tentar evitar problema visto no historico
             #Talvez seja melhor criar um arquivo de lista negra?
-            if not mensagem or mensagem.lower() in ("sair","exit","quit"," thank you.", " ."):
+            if mensagem.lower() in ("sair","exit","quit"," thank you.", " ."):
+                if not mensagem:
+                    print("Mensagem do usuario retornou como vazia.")
                 break
 
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
 
             #FALTA TESTAR A PARTIR DAQUI!!!!
-            break
             try:
                 #Dá o historico para a IA e retorna resposta.
                 resposta_ia = IA.perguntar_ia(history.pull_history())
