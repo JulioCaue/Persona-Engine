@@ -1,11 +1,14 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException
-from serial import SerialException
 import asyncio
 import threading
 import controlador
+from pathlib import Path
+from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
+from serial import SerialException
 from logs import log_writer
 
 
@@ -14,6 +17,16 @@ ultimo_modo: int
 tarefa_atual: asyncio.Task | None = None
 evento_atual: threading.Event | None = None
 lock_modo = asyncio.Lock()
+
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
+
+#CSS, JavaScript, imagens etc.
+app.mount(
+    "/static",
+    StaticFiles(directory=FRONTEND_DIR),
+    name="static",
+)
 
 class ModoEscolha(BaseModel):
     modo: int
@@ -25,6 +38,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", include_in_schema=False)
+async def frontend() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 @app.post("/controle")
