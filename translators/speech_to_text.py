@@ -37,6 +37,9 @@ def pegar_transcricao(parar_modo):
             recognizer.pause_threshold = TEMPO_FIM_FALA
             
             print("Ouvindo microfone...\n\n")
+            
+            if parar_modo.is_set():
+                return
 
             audio = recognizer.listen(
                 mic,
