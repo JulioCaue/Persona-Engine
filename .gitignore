@@ -1,7 +1,11 @@
 .venv/
 .env
 __pycache__/
-audios/
+audios/*
+!audios/audio_player.py
 logs/*
 !logs/log_writer.py
 ai/prompts
+
+#arquivo TODO pessoal.
+TODO.txt
