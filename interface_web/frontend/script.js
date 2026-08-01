@@ -3,7 +3,8 @@ url = "http://127.0.0.1:8000/controle";
 
 async function trocarModo(event) {
     const modoEscolhido = event.target.value;
-
+    
+    //envia apenas se modo selecionado está nessa lista, para evitar problemas
     if ([1,2,3].includes(Number(modoEscolhido))){
         try{
             const resposta = await fetch(url,{

@@ -37,7 +37,8 @@ def pegar_transcricao(parar_modo):
             recognizer.pause_threshold = TEMPO_FIM_FALA
             
             print("Ouvindo microfone...\n\n")
-            
+
+            #verifica flag antes e depois de escutar só por garantia
             if parar_modo.is_set():
                 return
 
@@ -52,6 +53,7 @@ def pegar_transcricao(parar_modo):
 
             print("Enviando áudio ao Google...")
 
+            #recognize_google dá erro mas funciona mesmo assim.
             texto = recognizer.recognize_google( # type: ignore[attr-defined]
                 audio,
                 language="pt-BR",

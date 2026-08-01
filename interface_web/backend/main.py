@@ -62,7 +62,7 @@ async def receber_modo(dados: ModoEscolha):
 
         tarefa_atual = asyncio.create_task(
             asyncio.to_thread(
-                controlador.trocar_modo,
+                controlador.executar_modo,
                 ultimo_modo,
                 evento_atual
             )

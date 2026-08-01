@@ -27,7 +27,7 @@ import pyaudio
 
 def imitar_fala(parar_modo:threading.Event):
     """
-    Envia comandos de servo para arduino com base em volume da voz.
+    Envia comandos de servo para arduino com base em volume da voz em loop até detectar troca de flag.
     """
 
     #limite dos servos:

@@ -24,11 +24,10 @@ def write(error_line):
     Precisa apenas da linha de erro.
     """
 
-    if os.path.exists(caminho_arquivo):
-        erros_no_arquivo = ler_erros()
-    else: erros_no_arquivo = "\n"
+    #garante que variavel exista (e sem \n feio)
+    erros_no_arquivo = ler_erros() if os.path.exists(caminho_arquivo) else ""
 
-    #Escreve um erro de cada tipo apenas a cada um minuto. Remove spam mas ainda facilita visualição de erros para debug.
+    #Escreve cada tipo de erro apenas uma vez por minuto.
     with open(caminho_arquivo,"a") as file:
         if f"[{hora_agora}]: {error_line}" not in erros_no_arquivo:
             file.write(f"[{hora_agora}]: {error_line}\n\n")
