@@ -5,7 +5,9 @@ Serve como local de interação do usuario com o projeto.
 Coordena as partes porém não as implementa.
 """
 
-
+import os
+import serial
+import threading
 from ai import llm as IA
 from ai import history
 from translators import text_to_speech as TTS
@@ -14,12 +16,17 @@ from animation import falar_audio as dublar
 from animation import falar_mic
 from audios import audio_player
 from logs import log_writer
-import subprocess
-import os
-import serial
 
+tipo_interação = {
+1: falar_mic.imitar_fala,
+2: STT.pegar_transcricao
+# terceiro é input manual, no codigo
+}
 
-def perguntar_ia():
+def trocar_modo(
+        modo_recebido: int,
+        parar_modo: threading.Event
+        ) -> None:
 
 
     """
@@ -31,73 +38,43 @@ def perguntar_ia():
     Para sair, digitar "sair","exit","quit" na mensagem para IA (volta para o loop principal)
     """
 
+    arduino_conectado = os.path.exists("/dev/ttyUSB0")
 
-    while True:
-        arduino_conectado = True
-        escolha_tipo = input("Escolha 1 para conversa por voz ou 2 para conversa por texto: ")
-        try:
-            escolha_tipo = int(escolha_tipo)
-            if escolha_tipo not in tipos_de_mensagem:
-                print("Escolha apenas 1 ou 2.")
-                continue
+    if modo_recebido != 1:
+        #Loop para manter conversa de usuario -> ia -> usuario...
+        while not parar_modo.is_set():
+            if modo_recebido == 2:
+                mensagem = tipo_interação[modo_recebido](parar_modo)
+            else: mensagem = input("\n\nDigite algo: ")
+
+            if parar_modo.is_set():
+                break
+
+            #Mensagens extras para tentar evitar problema visto no historico
+            #Talvez seja melhor criar um arquivo de lista negra?
+            if not mensagem or mensagem.lower() in ("sair","exit","quit"," thank you.", " ."):
+                break
+
+            history.add_message_to_history(mensagem,"user")
+
+            #FALTA TESTAR A PARTIR DAQUI!!!!
             break
-        except ValueError:
-            print("Apenas numeros.")
-        except Exception as e:
-            print(f"Um erro ocorreu: {e}")
-
-    while True:
-        mensagem = tipos_de_mensagem[escolha_tipo]()
-        if mensagem.lower() in ("sair","exit","quit"):
-            break
-        history.add_message_to_history(mensagem,"user")
-
-        try:
-            #Da todo o historico para a IA, da a mensagem do usuario ao modelo
-            #E transforma o texto da IA em audio com TTS.
-            TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
-
-            #O movimento da cabeça é independente, então pode ser opcional.
             try:
+                #Dá todo o historico para a IA, da a mensagem do usuario ao modelo e transforma o texto da IA em audio com TTS.
+                TTS.voz_para_wav(IA.perguntar_ia(history.pull_history()))
+
+                #O movimento da cabeça é independente, então pode ser opcional.
                 if arduino_conectado:
                     dublar.dublar_audio()
-            except serial.SerialException:
-                arduino_conectado = False
+
                 audio_player.Tocar_Wav()
-        
-        except Exception as e:
-            print(f"Ocorreu um erro: {e}")
-            log_writer.write(f"Ocorreu um erro: {e}")
+            
+            except Exception as e:
+                print(f"Ocorreu um erro: {e}")
+                log_writer.write(f"Ocorreu um erro: {e}")
 
-
-tipo_interação = {
-    1: falar_mic.imitar_fala,
-    2: perguntar_ia
-}
-
-tipos_de_mensagem = {
-    1: STT.pegar_transcricao,
-    2: lambda: input("\n\nDigite algo: ")
-}
-
-
-#Limpar terminal antes do loop e depois do not in por conta de estetica
-subprocess.run('cls' if os.name == 'nt' else 'clear')
-while True:
-    try:
-        escolha=input(
-        "Olá!\n\nOque deseja usar?\n\n1- Boca ao vivo\n2- Perguntar IA\n\nEscolha (1/2): ")
-        if escolha.lower() in ("sair","exit","quit"):
-            print("\n\nSaindo...")
-            break
-        if int(escolha) not in tipo_interação:
-            subprocess.run('cls' if os.name == 'nt' else 'clear')
-            print("Opção invalida.\n")
-            continue
-        tipo_interação[int(escolha)]()
-
-    except ValueError:
-        print("Digite apenas numeros.")
-    except KeyboardInterrupt:
-        print("\n\nSaindo...")
-        break
+    #deixando nesse formato para não precisar alterar dicionario de funções.
+    else:
+        if modo_recebido == 1 and not arduino_conectado:
+            raise serial.SerialException
+        tipo_interação[modo_recebido](parar_modo)
