@@ -2,16 +2,11 @@
 Arquivo responsavel por transformar fala do usuario em texto para IA.
 Grava microfone e gera arquivo wav.
 """
-
-
-from groq import Groq as grq
-import os
-from dotenv import load_dotenv
 from logs import log_writer
+
 #suprimir mensagens de erros do ALSA
 from ctypes import cdll, CFUNCTYPE, c_char_p, c_int
 _alsa_handler_ref = None
-
 try:
     _HANDLER_TYPE = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
     _alsa_handler_ref = _HANDLER_TYPE(lambda *_: None)  # guardado na global
@@ -20,63 +15,55 @@ except Exception:
     pass
 
 #continua normalmente
+
 import speech_recognition as sr
 
-load_dotenv()
-
-GROQ_API_KEY=os.getenv('GROQ_API_KEY')
-
-def criar_wav():
+def pegar_transcricao(parar_modo):
     """
     cria wav a partir de audio captado.
     """
-
     recognizer = sr.Recognizer()
-    TIMEOUT_AUDIO = 5
-    TEMPO_MAXIMO_FALA = 30
+    TIMEOUT_ESPERAR_FALA = 5
+    TEMPO_AJUSTE_AMBIENTE = 3
+    TEMPO_MAXIMO_FALA = 50
+    TEMPO_FIM_FALA = 2
+
     try:
         with sr.Microphone() as mic:
-            recognizer.pause_threshold=TIMEOUT_AUDIO
-            recognizer.energy_threshold=60
-            try:
-                print("Ouvindo microfone...\n\n")
-                audio_data = recognizer.listen(mic,TIMEOUT_AUDIO,TEMPO_MAXIMO_FALA)
+            if mic.stream is None:
+                raise RuntimeError("O stream do microfone não foi aberto.")
 
-                wav_bytes = audio_data.get_wav_data()
+            recognizer.adjust_for_ambient_noise(mic, TEMPO_AJUSTE_AMBIENTE)
+            recognizer.pause_threshold = TEMPO_FIM_FALA
+            
+            print("Ouvindo microfone...\n\n")
 
-                with open("audios/audio_input.wav","wb") as file:
-                    file.write(wav_bytes)
+            audio = recognizer.listen(
+                mic,
+                timeout= TIMEOUT_ESPERAR_FALA,
+                phrase_time_limit = TEMPO_MAXIMO_FALA
+            )
 
-                print(f"arquivo criado. Threshold foi: {recognizer.energy_threshold}\n\n\n")
-            except Exception as e:
-                log_writer.write(
-                    f"{e}\nThreshold foi: {recognizer.energy_threshold}"
-                    )
-                
+            if parar_modo.is_set():
+                return
+
+            print("Enviando áudio ao Google...")
+
+            texto = recognizer.recognize_google( # type: ignore[attr-defined]
+                audio,
+                language="pt-BR",
+            )
+
+            return texto
 
     except sr.WaitTimeoutError:
-        log_writer.write(f"{sr.WaitTimeoutError}")
+        log_writer.write("Nenhuma fala foi detectada em 5 segundos.")
 
     except sr.UnknownValueError:
-        log_writer.write(f"{sr.UnknownValueError}")
+        log_writer.write("O Google recebeu o áudio, mas não conseguiu entendê-lo.")
 
+    except sr.RequestError as erro:
+        log_writer.write(f"Erro ao acessar o serviço do Google: {erro}")
 
-def receber_STT():
-    """
-    Usa wav criado para gerar texto usando API externa. 
-    """
-    client = grq(api_key=GROQ_API_KEY,timeout=5)
-
-    filepath = "audios/audio_input.wav"
-
-    with open(filepath, "rb") as file:
-        transcription = client.audio.transcriptions.create(
-        file=file,
-        model="whisper-large-v3-turbo",
-        )
-        language="pt-BR"
-        return transcription.text
-
-def pegar_transcricao():
-    criar_wav()
-    return receber_STT()
+    except OSError as erro:
+        log_writer.write(f"Erro ao acessar o microfone: {erro}")
