@@ -15,3 +15,8 @@
 .desativado {
     background-color: #FF0019;
 }
+
+ /* Usar para esconder elemento */
+.esconder {
+    display: none;
+}
