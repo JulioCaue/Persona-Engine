@@ -24,6 +24,15 @@ tipo_interação = {
 # terceiro é tipo é manual, no codigo, por simplicidade.
 }
 
+falar_audio = True
+
+def trocar_modo_audio(escolha_audio: bool):
+    global falar_audio
+    if escolha_audio == True:
+        falar_audio = True
+    else:
+        falar_audio = False
+
 def executar_modo(
         modo_recebido: int,
         flag_parar_modo: threading.Event
@@ -74,7 +83,8 @@ def executar_modo(
 
                 else:
                     #Toca o arquivo wav criado se o arquivo existir.
-                    audio_player.Tocar_Wav()
+                    if falar_audio == True:
+                        audio_player.Tocar_Wav()
             
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")

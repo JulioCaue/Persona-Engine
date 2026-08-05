@@ -28,8 +28,8 @@ app.mount(
     name="static",
 )
 
-class ModoEscolha(BaseModel):
-    modo: int
+class Resposta_controle(BaseModel):
+    modo: int | bool
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,47 +46,58 @@ async def frontend() -> FileResponse:
 
 
 @app.post("/controle")
-async def receber_modo(dados: ModoEscolha):
+async def receber_modo(dados: Resposta_controle):
     global evento_atual, tarefa_atual, ultimo_modo
-    modo_recebido = int(dados.modo)
-    ultimo_modo = modo_recebido
+    #Toggle do uso do audio.
+    if isinstance(dados.modo,bool):
+        modo_audio = dados.modo
+        controlador.trocar_modo_audio(modo_audio)
+        return {
+            "modo_de_audio": modo_audio
+        }
+    #Codigo principal, gerencia controle do modo atual.
+    else:
+        modo_recebido = int(dados.modo)
+        ultimo_modo = modo_recebido
 
-    async with lock_modo:
-        tarefa_anterior = tarefa_atual
-        evento_anterior = evento_atual
+        async with lock_modo:
+            tarefa_anterior = tarefa_atual
+            evento_anterior = evento_atual
 
-        if evento_anterior is not None:
-            evento_anterior.set()
+            if evento_anterior is not None:
+                evento_anterior.set()
 
-        if tarefa_anterior is not None:
-            try:
-                await tarefa_anterior
+            if tarefa_anterior is not None:
+                try:
+                    await tarefa_anterior
 
-            except SerialException:
-                raise HTTPException(
-                    status_code=503,
-                    detail="Arduino não conectado."
+                except SerialException:
+                    raise HTTPException(
+                        status_code=503,
+                        detail="Arduino não conectado."
+                    )
+
+                except Exception as e:
+                    print(f"Ocorreu um erro: {e}")
+                    log_writer.write(__name__,f"Ocorreu um erro: {e}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Erro interno inesperado"
+                    )
+
+            evento_atual = threading.Event()
+
+            #Apenas chama função se ultimo_modo não for zero, assim permitindo que botão chegue até aqui sem entrar na função controlador.
+            if not ultimo_modo == 0:
+                tarefa_atual = asyncio.create_task(
+                    asyncio.to_thread(
+                        controlador.executar_modo,
+                        ultimo_modo,
+                        evento_atual
+                    )
                 )
 
-            except Exception as e:
-                print(f"Ocorreu um erro: {e}")
-                log_writer.write(__name__,f"Ocorreu um erro: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail="Erro interno inesperado"
-                )
 
-        evento_atual = threading.Event()
-
-        tarefa_atual = asyncio.create_task(
-            asyncio.to_thread(
-                controlador.executar_modo,
-                ultimo_modo,
-                evento_atual
-            )
-        )
-
-
-    return {
-        "modo_recebido": modo_recebido
-    }
+        return {
+            "modo_recebido": modo_recebido
+        }

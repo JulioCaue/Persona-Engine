@@ -21,22 +21,35 @@
             </div>
         </header>
         <main>
-            <section>
+            <controle>
                 <h2>Controle</h2>
-                <label for="modo">Modo de operação:
-                <select id="modo">
-                    <option value=>Selecione...</option>
-                    <option value="1">Imitar Fala</option>
-                    <option value="2">Conversa por Microfone</option>
-                    <option value="3">Conversa por Texto</option>
-                
-                </select>
-            </section>
-    
-            <section class="esconder" id="section_input_mensagem">
-                <label for="mensagem_usuario">Enviar mensagem: </label>
-                <input type="text" id="campo_input" name="mensagem_usuario">
-            </section>
+                <section>
+                    <label for="modo_audio">Audio:</label>
+                    <select id="modo_audio">
+                        <option value=>Selecione...</option>
+                        <option value="1">Falar</option>
+                        <option value="2">Não Falar</option>
+                    </select>
+                </section>
+                <section>
+                    <label for="modoComportamento">Modo de operação:</label>
+                    <select id="modoComportamento">
+                        <option value=>Selecione...</option>
+                        <option value="1">Imitar Fala</option>
+                        <option value="2">Conversa por Microfone</option>
+                        <option value="3">Conversa por Texto</option>
+                    </select>
+                </section>
+        
+                <section class="esconder" id="section_input_mensagem">
+                    <label for="mensagem_usuario">Enviar mensagem: </label>
+                    <input type="text" id="campo_input" name="mensagem_usuario">
+                </section>
+
+                <section>
+                    <button id="botao_parar">parar</button>
+                </section>
+            </controle>
         </main>
     </body>
 </html>
