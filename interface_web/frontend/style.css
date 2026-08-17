@@ -5,7 +5,7 @@
     border-radius: 50%;
     display: inline-block;
     margin-right: 8px;
-    background-color: #FF0019;
+    background-color: #2f00ff;
 }
 /* Estado ativo: cor verde */
 .ativo {
@@ -13,7 +13,7 @@
 }
 /* Estado desativado: cor vermelha */
 .desativado {
-    background-color: #FF0019;
+    background-color: #ff0000;
 }
 
  /* Usar para esconder elemento */
