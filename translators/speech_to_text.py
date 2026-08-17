@@ -23,7 +23,7 @@ def pegar_transcricao(parar_modo):
     cria wav a partir de audio captado.
     """
     recognizer = sr.Recognizer()
-    TIMEOUT_ESPERAR_FALA = 5
+    TIMEOUT_ESPERAR_FALA = 3
     TEMPO_AJUSTE_AMBIENTE = 3
     TEMPO_MAXIMO_FALA = 50
     TEMPO_FIM_FALA = 2
