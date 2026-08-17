@@ -1,6 +1,7 @@
 import asyncio
 import threading
 import controlador
+import os
 from pathlib import Path
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -29,7 +30,8 @@ app.mount(
 )
 
 class Resposta_controle(BaseModel):
-    modo: int | bool
+    modo: int | bool;
+    input: str | None
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,6 +45,13 @@ app.add_middleware(
 @app.get("/", include_in_schema=False)
 async def frontend() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.get("/status/arduino")
+def verificar_arduino():
+    return os.path.exists("/dev/ttyUSB0")
+
+
 
 
 @app.post("/controle")
@@ -59,6 +68,7 @@ async def receber_modo(dados: Resposta_controle):
     else:
         modo_recebido = int(dados.modo)
         ultimo_modo = modo_recebido
+        input_usuario = dados.input
 
         async with lock_modo:
             tarefa_anterior = tarefa_atual
@@ -72,10 +82,7 @@ async def receber_modo(dados: Resposta_controle):
                     await tarefa_anterior
 
                 except SerialException:
-                    raise HTTPException(
-                        status_code=503,
-                        detail="Arduino não conectado."
-                    )
+                    print("Arduino não conectado.")
 
                 except Exception as e:
                     print(f"Ocorreu um erro: {e}")
@@ -91,13 +98,15 @@ async def receber_modo(dados: Resposta_controle):
             if not ultimo_modo == 0:
                 tarefa_atual = asyncio.create_task(
                     asyncio.to_thread(
-                        controlador.executar_modo,
+                        controlador.controla_modo,
                         ultimo_modo,
-                        evento_atual
+                        evento_atual,
+                        input_usuario
                     )
                 )
 
 
         return {
-            "modo_recebido": modo_recebido
+            "modo_recebido": modo_recebido,
+            "input_usuario": input_usuario
         }
