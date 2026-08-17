@@ -4,7 +4,7 @@ Pode configurar os parametros da comunicação.
 """
 
 from ollama import chat
-from ai import history
+from ia import history
 from logs import log_writer
 import os
 
