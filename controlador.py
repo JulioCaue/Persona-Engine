@@ -33,9 +33,10 @@ def trocar_modo_audio(escolha_audio: bool):
     else:
         falar_audio = False
 
-def executar_modo(
+def controla_modo(
         modo_recebido: int,
-        flag_parar_modo: threading.Event
+        flag_parar_modo: threading.Event,
+        input_usuario: str | None
         ) -> None:
 
 
@@ -56,20 +57,20 @@ def executar_modo(
         while not flag_parar_modo.is_set():
             if modo_recebido == 2:
                 mensagem = tipo_interação[modo_recebido](flag_parar_modo)
-            else: mensagem = input("\n\nDigite algo: ")
+            else: mensagem = input_usuario
 
             if flag_parar_modo.is_set():
                 break
 
             #Mensagens extras para tentar evitar problema visto no historico
             #Talvez seja melhor criar um arquivo de lista negra?
-            if mensagem.lower() in ("sair","exit","quit"," thank you.", " .") or not mensagem:
+            if (not mensagem) or (mensagem.lower() in ("sair","exit","quit"," thank you.", " .")):
                 break
 
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
 
-            #FALTA TESTAR A PARTIR DAQUI!!!!
+
             try:
                 #Dá o historico para a IA e retorna resposta.
                 resposta_ia = IA.perguntar_ia(history.pull_history())
@@ -85,6 +86,9 @@ def executar_modo(
                     #Toca o arquivo wav criado se o arquivo existir.
                     if falar_audio == True:
                         audio_player.Tocar_Wav()
+
+                if modo_recebido == 3:
+                    break
             
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")
