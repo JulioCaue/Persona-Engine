@@ -1,29 +1,44 @@
 const listaModos = document.getElementById("modoComportamento")
-const caixa_mensagem = document.getElementById("section_input_mensagem")
-const btn_parar = document.getElementById("botao_parar")
-const modo_audio = document.getElementById("modo_audio")
-const caixa_input = document.getElementById("campo_input")
-const btn_enviar = document.getElementById("btnEnviar")
-const sinal_arduino = document.getElementById("status_arduino")
+const caixaMensagem = document.getElementById("form_mensagem")
+const btnParar = document.getElementById("botao_parar")
+const modoAudio = document.getElementById("modo_audio")
+const caixaInput = document.getElementById("campo_input")
+const formMensagem = document.getElementById("form_mensagem")
+const btnEnviar = document.getElementById("btnEnviar")
+const sinalArduino = document.getElementById("status_arduino")
+const janelaChat = document.getElementById("chat-mensagens")
 url = "http://127.0.0.1:8000";
 
+function adicionarMensagem(texto,tipo){
+    const mensagem = document.createElement("div");
+    mensagem.classList.add("mensagem",tipo);
+
+    const conteudo = document.createElement("p");
+    conteudo.textContent = texto;
+
+    mensagem.appendChild(conteudo);
+    janelaChat.appendChild(mensagem)
+}
 
 async function verificar_arduino(){
     const resposta = await fetch(`${url}/status/arduino`);
     const status = await resposta.json();
     if (status){
-        sinal_arduino.classList.add("ativo");
-        sinal_arduino.classList.remove("desativado")
+        sinalArduino.classList.add("ativo");
+        sinalArduino.classList.remove("desativado")
     }
     else{
-        sinal_arduino.classList.add("desativado");
-        sinal_arduino.classList.remove("ativo")
+        sinalArduino.classList.add("desativado");
+        sinalArduino.classList.remove("ativo")
     }
     return status
 }
 
 async function receberInput(click) {
-    const textoEscrito = caixa_input.value;
+    const textoEscrito = caixaInput.value;
+
+    adicionarMensagem(textoEscrito,"usuario")
+    caixaInput.value = ""
 
     try{
         const resposta = await fetch(`${url}/controle`,{
@@ -101,10 +116,10 @@ async function mostrarInput(event) {
     const modoEscolhido = event.target.value;
 
     if (Number(modoEscolhido) == 3){
-        caixa_mensagem.classList.remove('esconder');
+        caixaMensagem.classList.remove('esconder');
     }
     else {
-        caixa_mensagem.classList.add('esconder');
+        caixaMensagem.classList.add('esconder');
     }
 }
 
@@ -140,11 +155,14 @@ verificar_arduino().then(status => {
 })
 setInterval(verificar_arduino,5000)
 
-btn_enviar.addEventListener("click",receberInput)
+formMensagem.addEventListener("submit", (event) => {
+    event.preventDefault();
+    receberInput();
+});
 
-btn_parar.addEventListener("click",pararModo);
+btnParar.addEventListener("click",pararModo);
 
-modo_audio.addEventListener("change",trocarAudio);
+modoAudio.addEventListener("change",trocarAudio);
 
 listaModos.addEventListener("change",mostrarInput);
 

@@ -22,9 +22,8 @@
                 <section>
                     <label for="modo_audio">Resposta com voz:</label>
                     <select id="modo_audio">
-                        <option value=>Selecione...</option>
-                        <option value="1">Falar</option>
                         <option value="2">Não Falar</option>
+                        <option value="1">Falar</option>
                     </select>
                 </section>
                 <section>
@@ -37,16 +36,21 @@
                     </select>
                 </section>
 
-                <section class="esconder" id="section_input_mensagem">
-                    <label for="mensagem_usuario">Enviar mensagem: </label>
-                    <input type="text" id="campo_input" name="mensagem_usuario">
-                    <button id="btnEnviar">Enviar</button>
-                </section>
-
                 <section>
                     <button id="botao_parar">parar</button>
                 </section>
             </controle>
+
+            <section class="chat-container">
+                <div class="chat-mensagens" id="chat-mensagens">
+                </div>
+
+                <form class="esconder" id="form_mensagem">
+                    <label for="input_usuario">Enviar mensagem: </label>
+                    <input type="text" id="campo_input" name="input_usuario" autocomplete="off">
+                    <button type="submit" id="btnEnviar">Enviar</button>
+                </form>
+            </section>
         </main>
     </body>
 </html>

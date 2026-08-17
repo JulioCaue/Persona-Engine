@@ -1,22 +1,475 @@
-/* estilo base do sinalizador */
-.status-dot {
-    height: 15px;
-    width: 15px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-    background-color: #2f00ff;
-}
-/* Estado ativo: cor verde */
-.ativo {
-    background-color: #28a745;
-}
-/* Estado desativado: cor vermelha */
-.desativado {
-    background-color: #ff0000;
+:root {
+    --fundo: #0d1117;
+    --painel: #161b22;
+    --painel-claro: #1c2128;
+    --borda: #30363d;
+
+    --texto: #e6edf3;
+    --texto-secundario: #8b949e;
+
+    --principal: #6e5ce6;
+    --principal-hover: #8070ed;
+
+    --mensagem-usuario: #5d4fd6;
+    --mensagem-ia: #21262d;
+
+    --verde: #3fb950;
+    --vermelho: #f85149;
+
+    --raio: 10px;
 }
 
- /* Usar para esconder elemento */
+
+/* =========================
+   GERAL
+   ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background-color: var(--fundo);
+    color: var(--texto);
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+
+/* =========================
+   CABEÇALHO
+   ========================= */
+
+header {
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 30px;
+
+    background-color: var(--painel);
+    border-bottom: 1px solid var(--borda);
+}
+
+header h1 {
+    margin: 0;
+
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+
+/* =========================
+   STATUS ARDUINO
+   ========================= */
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 7px 12px;
+
+    color: var(--texto-secundario);
+
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background-color: var(--texto-secundario);
+}
+
+.status-dot.ativo {
+    background-color: var(--verde);
+
+    box-shadow: 0 0 7px rgba(63, 185, 80, 0.6);
+}
+
+.status-dot.desativado {
+    background-color: var(--vermelho);
+}
+
+
+/* =========================
+   CONTEÚDO
+   ========================= */
+
+main {
+    width: min(1200px, calc(100% - 40px));
+
+    margin: 35px auto;
+
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+
+    gap: 25px;
+}
+
+
+/* =========================
+   PAINEL DE CONTROLE
+   ========================= */
+
+controle {
+    display: block;
+
+    height: fit-content;
+
+    padding: 22px;
+
+    background-color: var(--painel);
+
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+}
+
+controle h2 {
+    margin: 0 0 25px;
+
+    font-size: 1.2rem;
+}
+
+controle section {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-bottom: 22px;
+}
+
+controle section:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================
+   LABELS
+   ========================= */
+
+label {
+    color: var(--texto-secundario);
+
+    font-size: 0.88rem;
+}
+
+
+/* =========================
+   INPUTS E SELECTS
+   ========================= */
+
+select,
+input {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    color: var(--texto);
+    background-color: var(--fundo);
+
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+
+    font: inherit;
+
+    outline: none;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+select:focus,
+input:focus {
+    border-color: var(--principal);
+
+    box-shadow: 0 0 0 3px rgba(110, 92, 230, 0.15);
+}
+
+
+/* seta customizada do select */
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+
+    padding-right: 40px;
+
+    background-image: url(
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"
+    );
+
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+
+/* =========================
+   BOTÕES
+   ========================= */
+
+button {
+    padding: 10px 16px;
+
+    color: white;
+    background-color: var(--principal);
+
+    border: 0;
+    border-radius: 8px;
+
+    font: inherit;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        transform 0.1s ease;
+}
+
+button:hover {
+    background-color: var(--principal-hover);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+
+/* botão de parar */
+
+#botao_parar {
+    width: 100%;
+
+    color: #ff7b72;
+    background-color: transparent;
+
+    border: 1px solid rgba(248, 81, 73, 0.5);
+}
+
+#botao_parar:hover {
+    background-color: rgba(248, 81, 73, 0.1);
+}
+
+
+/* =========================
+   CHAT
+   ========================= */
+
+.chat-container {
+    min-width: 0;
+    height: 70vh;
+    min-height: 500px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background-color: var(--painel);
+
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+}
+
+
+/* janela onde aparecem as mensagens */
+
+.chat-mensagens {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 22px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--borda) transparent;
+}
+
+
+/* =========================
+   MENSAGENS
+   ========================= */
+
+.mensagem {
+    width: fit-content;
+    max-width: 72%;
+
+    padding: 10px 14px;
+
+    border-radius: 14px;
+
+    line-height: 1.45;
+
+    overflow-wrap: anywhere;
+}
+
+.mensagem p {
+    margin: 0;
+}
+
+
+/* mensagem do usuário */
+
+.mensagem.usuario {
+    align-self: flex-end;
+
+    color: white;
+    background-color: var(--mensagem-usuario);
+
+    border-bottom-right-radius: 4px;
+}
+
+
+/* mensagem da Persona */
+
+.mensagem.ia {
+    align-self: flex-start;
+
+    background-color: var(--mensagem-ia);
+
+    border: 1px solid var(--borda);
+    border-bottom-left-radius: 4px;
+}
+
+
+/* =========================
+   ÁREA DE ENVIO
+   ========================= */
+
+#section_input_mensagem {
+    padding: 15px;
+
+    background-color: var(--painel-claro);
+
+    border-top: 1px solid var(--borda);
+}
+
+#form_mensagem{
+    display: grid;
+
+    grid-template-columns: 1fr auto;
+
+    gap: 9px 10px;
+}
+
+
+/* label ocupa a linha inteira */
+
+#form_mensagem label {
+    grid-column: 1 / -1;
+}
+
+
+/* input ocupa o espaço disponível */
+
+#campo_input {
+    min-width: 0;
+}
+
+
+/* botão fica ao lado do input */
+
+#btnEnviar {
+    min-width: 90px;
+}
+
+
+/* =========================
+   ESCONDER ELEMENTOS
+   ========================= */
+
 .esconder {
-    display: none;
+    display: none !important;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+   ========================= */
+
+@media (max-width: 750px) {
+
+    header {
+        height: auto;
+
+        padding: 15px 18px;
+
+        gap: 15px;
+    }
+
+    header h1 {
+        font-size: 1rem;
+    }
+
+    main {
+        width: calc(100% - 24px);
+
+        margin: 18px auto;
+
+        grid-template-columns: 1fr;
+    }
+
+    controle {
+        padding: 18px;
+    }
+
+    .chat-container {
+        height: 65vh;
+        min-height: 450px;
+    }
+
+    .mensagem {
+        max-width: 85%;
+    }
+
+}
+
+
+/* telas muito pequenas */
+
+@media (max-width: 450px) {
+
+    .status-container {
+        padding: 6px 9px;
+
+        font-size: 0.8rem;
+    }
+
+    .chat-mensagens {
+        padding: 15px;
+    }
+
+    #section_input_mensagem {
+        padding: 12px;
+    }
+
+    .mensagem {
+        max-width: 88%;
+    }
+
 }
