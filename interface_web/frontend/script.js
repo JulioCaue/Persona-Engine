@@ -1,13 +1,18 @@
-const listaModos = document.getElementById("modoComportamento")
-const caixaMensagem = document.getElementById("form_mensagem")
-const btnParar = document.getElementById("botao_parar")
-const modoAudio = document.getElementById("modo_audio")
-const caixaInput = document.getElementById("campo_input")
-const formMensagem = document.getElementById("form_mensagem")
-const btnEnviar = document.getElementById("btnEnviar")
-const sinalArduino = document.getElementById("status_arduino")
-const janelaChat = document.getElementById("chat-mensagens")
+const listaModos = /** @type {HTMLSelectElement} */ (
+    document.getElementById("modoComportamento")
+);
+const modoAudio = /** @type {HTMLSelectElement} */ (
+    document.getElementById("modo_audio")
+);
+const caixaMensagem = document.getElementById("form_mensagem");
+const btnParar = document.getElementById("botao_parar");
+const caixaInput = document.getElementById("campo_input");
+const formMensagem = document.getElementById("form_mensagem");
+const btnEnviar = document.getElementById("btnEnviar");
+const sinalArduino = document.getElementById("status_arduino");
+const janelaChat = document.getElementById("chat-mensagens");
 url = "http://127.0.0.1:8000";
+const socket = new WebSocket("ws://127.0.0.1:8000/ws")
 
 function adicionarMensagem(texto,tipo){
     const mensagem = document.createElement("div");
@@ -17,7 +22,7 @@ function adicionarMensagem(texto,tipo){
     conteudo.textContent = texto;
 
     mensagem.appendChild(conteudo);
-    janelaChat.appendChild(mensagem)
+    janelaChat.appendChild(mensagem);
 }
 
 async function verificar_arduino(){
@@ -150,10 +155,20 @@ async function trocarModo(event) {
     }
 }
 
+socket.onmessage = (event) => {
+    const {resposta, autor} = JSON.parse(event.data);
+    adicionarMensagem(resposta,autor);
+}
+
 verificar_arduino().then(status => {
     console.log(status);
 })
 setInterval(verificar_arduino,5000)
+
+window.addEventListener("pageshow", () => {
+    listaModos.selectedIndex = 0;
+    modoAudio.selectedIndex = 0;
+})
 
 formMensagem.addEventListener("submit", (event) => {
     event.preventDefault();
