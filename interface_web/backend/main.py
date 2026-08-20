@@ -2,8 +2,9 @@ import asyncio
 import threading
 import controlador
 import os
+import json
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +19,7 @@ ultimo_modo: int
 tarefa_atual: asyncio.Task | None = None
 evento_atual: threading.Event | None = None
 lock_modo = asyncio.Lock()
+conexao_frontend: WebSocket | None = None
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
@@ -33,6 +35,11 @@ class Resposta_controle(BaseModel):
     modo: int | bool;
     input: str | None
 
+class Receber_resposta_ia(BaseModel):
+    resposta: str;
+    autor: str
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,7 +47,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/", include_in_schema=False)
 async def frontend() -> FileResponse:
@@ -51,7 +57,37 @@ async def frontend() -> FileResponse:
 def verificar_arduino():
     return os.path.exists("/dev/ttyUSB0")
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    print("ENTROU NA ROTA WEBSOCKET")
+    global conexao_frontend
 
+    await websocket.accept()
+    conexao_frontend = websocket
+    print("websocket conectado")
+
+    while True:
+        await websocket.receive_text()
+
+async def mandar_resposta(resposta_ia):
+    print("entrou em mandar resposta")
+    if conexao_frontend is None:
+        print("Frontend não conectado")
+        return
+    await conexao_frontend.send_json(resposta_ia)
+
+@app.post("/receber_mensagem")
+async def receber_resposta(resposta: Receber_resposta_ia):
+    print("entrou em receber resposta")
+    resposta_ia = resposta.resposta
+    autor  = resposta.autor
+
+    mensagem = {
+        "resposta": resposta_ia,
+        "autor": autor
+    }
+    if resposta_ia:
+        await mandar_resposta(mensagem)
 
 
 @app.post("/controle")
@@ -104,7 +140,6 @@ async def receber_modo(dados: Resposta_controle):
                         input_usuario
                     )
                 )
-
 
         return {
             "modo_recebido": modo_recebido,
