@@ -81,7 +81,7 @@ def dublar_audio():
 
                 boca_aberta = True if angulo_final > boca_min_pos else False
 
-                print(f"RMS: {rms:.4f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
+                #print(f"RMS: {rms:.4f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
 
                 stream.write(chunk_audio.astype(np.float32).tobytes())
                 # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
