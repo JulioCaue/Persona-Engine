@@ -6,6 +6,7 @@ audios/*
 logs/*
 !logs/log_writer.py
 ai/prompts
+testes
 
 #arquivo TODO pessoal.
 TODO.txt
