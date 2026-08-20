@@ -8,7 +8,7 @@ Coordena as partes porém não as implementa.
 import os
 import serial
 import threading
-from ai import llm as IA
+import requests
 from ai import history
 from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
@@ -24,14 +24,24 @@ tipo_interação = {
 # terceiro é tipo é manual, no codigo, por simplicidade.
 }
 
-falar_audio = True
+url = "http://127.0.0.1:8000"
+flag_falar_audio = True
 
 def trocar_modo_audio(escolha_audio: bool):
-    global falar_audio
+    global flag_falar_audio
     if escolha_audio == True:
-        falar_audio = True
+        flag_falar_audio = True
     else:
-        falar_audio = False
+        flag_falar_audio = False
+
+def func_falar_audio(resposta_ia,arduino_conectado):
+    if flag_falar_audio == True:
+        #Transforma resposta em arquivo .wav
+        TTS.voz_para_wav(resposta_ia)
+        #O movimento da cabeça é independente, então pode ser opcional.
+        if arduino_conectado:
+            dublar.dublar_audio()
+        audio_player.Tocar_Wav()
 
 def controla_modo(
         modo_recebido: int,
@@ -48,6 +58,8 @@ def controla_modo(
 
     Para sair, digitar "sair","exit","quit" na mensagem para IA (volta para o loop principal)
     """
+
+    from ai import llm as IA
 
     #Verifica se arduino está conectado.
     arduino_conectado = os.path.exists("/dev/ttyUSB0")
@@ -70,22 +82,38 @@ def controla_modo(
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
 
+            if modo_recebido != 3:
+                resposta = {
+                    "resposta": mensagem,
+                    "autor": "usuario"
+                }
+                requests.post(
+                    f"{url}/receber_mensagem",
+                    json=resposta
+                )
+
 
             try:
                 #Dá o historico para a IA e retorna resposta.
-                resposta_ia = IA.perguntar_ia(history.pull_history())
+                resposta_ia = IA.perguntar_ia(
+                    historico = history.pull_history(),
+                    flag_parar = flag_parar_modo
+                )
 
-                #Transforma resposta em arquivo .wav
-                TTS.voz_para_wav(resposta_ia)
-
-                #O movimento da cabeça é independente, então pode ser opcional.
-                if arduino_conectado:
-                    dublar.dublar_audio()
-
+                if resposta_ia:
+                    func_falar_audio(resposta_ia,arduino_conectado)
                 else:
-                    #Toca o arquivo wav criado se o arquivo existir.
-                    if falar_audio == True:
-                        audio_player.Tocar_Wav()
+                    flag_parar_modo.set()
+                    break
+
+                resposta = {
+                    "resposta": resposta_ia,
+                    "autor": "ia"
+                }
+                requests.post(
+                    f"{url}/receber_mensagem",
+                    json=resposta
+                )
 
                 if modo_recebido == 3:
                     break
