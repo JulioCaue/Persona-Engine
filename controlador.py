@@ -9,6 +9,8 @@ import os
 import serial
 import threading
 import requests
+import traceback
+from animation import gerenciador # trocar nome
 from ai import history
 from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
@@ -25,7 +27,8 @@ tipo_interação = {
 }
 
 url = "http://127.0.0.1:8000"
-flag_falar_audio = True
+flag_falar_audio: bool = False
+mensagens_saida= ["sair","exit","quit"," thank you.", " .",""," ","."]
 
 def trocar_modo_audio(escolha_audio: bool):
     global flag_falar_audio
@@ -69,19 +72,18 @@ def controla_modo(
         while not flag_parar_modo.is_set():
             if modo_recebido == 2:
                 mensagem = tipo_interação[modo_recebido](flag_parar_modo)
-            else: mensagem = input_usuario
+            else: 
+                mensagem = input_usuario
 
             if flag_parar_modo.is_set():
-                break
+                return
 
             #Mensagens extras para tentar evitar problema visto no historico
             #Talvez seja melhor criar um arquivo de lista negra?
-            if (not mensagem) or (mensagem.lower() in ("sair","exit","quit"," thank you.", " .")):
+            if (not mensagem) or (mensagem.lower() in (mensagens_saida)):
                 break
-
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
-
             if modo_recebido != 3:
                 resposta = {
                     "resposta": mensagem,
@@ -92,19 +94,12 @@ def controla_modo(
                     json=resposta
                 )
 
-
             try:
                 #Dá o historico para a IA e retorna resposta.
                 resposta_ia = IA.perguntar_ia(
                     historico = history.pull_history(),
                     flag_parar = flag_parar_modo
                 )
-
-                if resposta_ia:
-                    func_falar_audio(resposta_ia,arduino_conectado)
-                else:
-                    flag_parar_modo.set()
-                    break
 
                 resposta = {
                     "resposta": resposta_ia,
@@ -115,15 +110,28 @@ def controla_modo(
                     json=resposta
                 )
 
+                if resposta_ia:
+                    func_falar_audio(resposta_ia,arduino_conectado)
+                else:
+                    flag_parar_modo.set()
+                    return
+
                 if modo_recebido == 3:
-                    break
+                    return
             
             except Exception as e:
                 print(f"Ocorreu um erro: {e}")
-                log_writer.write(__name__,f"Ocorreu um erro: {e}")
+                error = traceback.format_exc()
+                log_writer.write(__name__,f"Ocorreu um erro: {error}")
+                break
 
     #deixando nesse formato para não precisar alterar dicionario de funções.
     else:
         if modo_recebido == 1 and not arduino_conectado:
             raise serial.SerialException
         tipo_interação[modo_recebido](flag_parar_modo)
+
+
+#desligadas por enquanto para evitar problemas.
+#gerenciador.ANIMpower_on()
+#gerenciador.ANIMpowerOFF()
