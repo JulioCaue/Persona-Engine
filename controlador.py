@@ -132,6 +132,6 @@ def controla_modo(
         tipo_interação[modo_recebido](flag_parar_modo)
 
 
-#desligadas por enquanto para evitar problemas.
+#desligadas por enquanto para evitar problemas. Estão sem implementação real ainda.
 #gerenciador.ANIMpower_on()
 #gerenciador.ANIMpowerOFF()

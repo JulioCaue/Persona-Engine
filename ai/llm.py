@@ -14,7 +14,11 @@ import threading
 musica_atual: str
 
 musicas = [
-    """NOMES DE MUSICAS AQUI!!!"""
+    "daisy bell",
+    "hidden in the sand",
+    "hello world",
+    "sleeping in the cold below",
+    "twist"
 ]
 
 caminho_prompt_sistema = "ai/prompts/sistema/system_prompts.py"
@@ -73,6 +77,7 @@ parar_musica_tool = {
 }
 
 def chamada_ia(prompt_sistema,historico):
+    """faz a chamada para a IA"""
     return chat(
     model='qwen2.5:3b',
     messages=[
@@ -90,7 +95,7 @@ def perguntar_ia(
     flag_parar: threading.Event):
 
 
-    """Envia prompt para IA."""
+    """gerencia retorno da resposa da IA."""
 
     if not prompt_sistema:
         erro = "Arquivo de prompt do sistema não foi encontrado."
