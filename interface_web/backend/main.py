@@ -2,7 +2,6 @@ import asyncio
 import threading
 import controlador
 import os
-import json
 from pathlib import Path
 from fastapi import FastAPI, WebSocket
 from pydantic import BaseModel
@@ -86,8 +85,7 @@ async def receber_resposta(resposta: Receber_resposta_ia):
         "resposta": resposta_ia,
         "autor": autor
     }
-    if resposta_ia:
-        await mandar_resposta(mensagem)
+    await mandar_resposta(mensagem)
 
 
 @app.post("/controle")
