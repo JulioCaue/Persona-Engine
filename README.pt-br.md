@@ -99,6 +99,14 @@ Persona-Engine
 - Linux
 - Ambientes virtuais Python
 
+# Suporte de plataforma
+
+O Persona-Engine está atualmente sendo desenvolvido e testado principalmente no **Linux**.
+
+Outros sistemas operacionais **não são oficialmente suportados neste momento**, e algumas funcionalidades podem não funcionar como esperado fora do Linux, especialmente integrações com hardware e recursos específicos do sistema.
+
+O suporte a outros sistemas operacionais poderá ser adicionado futuramente.
+
 ## Como funciona
 
 Em alto nível, o sistema funciona da seguinte maneira:
