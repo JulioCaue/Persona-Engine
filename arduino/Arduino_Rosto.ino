@@ -31,6 +31,49 @@ void setup() {
   palpebra.write(posicoesServos[3]);
 }
 
+void processarComando(String comando) {
+  if (!comando.startsWith("<")){
+    return;
+  }
+
+  comando = comando.substring(1)
+
+  int novosAngulos[4];
+  int indice = 0;
+  int inicio = 0;
+
+  for (int j = 0; j <= comando.lenght(); j++){
+    if (comando[j] == ',' || j == comando.lenght()) {
+      if (indice >=4){
+        return;
+      }
+
+      String valorTexto = comando.substring(inicio, j);
+
+      if (valorTexto.lenght() == 0) {
+        return
+      }
+
+      int valor = valorTexto.toInt();
+
+      if (valor < 40 || valor > 140) {
+        return;
+      }
+
+      novosAngulos[indice] = valor;
+      indice++;
+
+      inicio = j + 1;
+    }
+  }
+  if (indice != 4){
+    return;
+  }
+  for (int i = 0; i < 4; i++) {
+    posicoesServos[i] = novosAngulos[i];
+  }
+}
+
 void loop() {
   for (int i = 0; i < 4; i++){
     angulosPrev[i] = posicoesServos[i];
@@ -38,25 +81,18 @@ void loop() {
 
   if (Serial.available() > 0) {
     String comando = Serial.readStringUntil('>');
-    if (comando.startsWith("<")) {
-      comando = comando.substring(1); // remove o '<'
-      
-      int i = 0;
-      int inicio = 0;
-      for (int j = 0; j <= comando.length(); j++) {
-        if (comando[j] == ',' || j == comando.length()) {
-          posicoesServos[i++] = comando.substring(inicio, j).toInt();
-          inicio = j + 1;
-        }
-      }
-    }
+    processarComando(comando);
   }
-  for (int i = 0; i < 4; i++){
-    if (angulosPrev[i] != posicoesServos[i]){
-      boca.write(posicoesServos[0]);
-      olhoEsquerdo.write(posicoesServos[1]);
-      olhoDireito.write(posicoesServos[2]);
-      palpebra.write(posicoesServos[3]);
-    }
-  }
+
+  if (angulosPrev[0] != posicoesServos[0])
+    boca.write(posicoesServos[0]);
+  
+  if (angulosPrev[1] != posicoesServos[1])
+    boca.write(posicoesServos[1]);
+
+  if (angulosPrev[2] != posicoesServos[2])
+    boca.write(posicoesServos[2]);
+
+  if (angulosPrev[3] != posicoesServos[3])
+    boca.write(posicoesServos[3]);
 }
