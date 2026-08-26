@@ -6,7 +6,11 @@ audios/*
 logs/*
 !logs/log_writer.py
 ai/prompts
-testes
 
+#testes
+animation/gerenciador.py
+testes
+#codigo sem teste ainda
+arduino/Arduino_Rosto.ino
 #arquivo TODO pessoal.
 TODO.txt
