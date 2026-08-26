@@ -99,6 +99,14 @@ Persona-Engine
 - Linux
 - Python virtual environments
 
+# Platform Support
+
+Persona-Engine is currently being developed and tested primarily on **Linux**.
+
+Other operating systems are **not officially supported at this time**, and some features may not work as expected outside Linux, especially hardware and system-level integrations.
+
+Support for additional operating systems may be added in the future.
+
 ## How it works
 
 At a high level, the system works as follows:
