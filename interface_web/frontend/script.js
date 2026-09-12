@@ -12,7 +12,31 @@ const btnEnviar = document.getElementById("btnEnviar");
 const sinalArduino = document.getElementById("status_arduino");
 const janelaChat = document.getElementById("chat-mensagens");
 url = "http://127.0.0.1:8000";
-const socket = new WebSocket("ws://127.0.0.1:8000/ws")
+let socket;
+
+function conectarWebSocket() {
+    socket = new WebSocket("ws://127.0.0.1:8000/ws");
+
+    socket.onopen = () => {
+        console.log("WebSocket conectado");
+    };
+
+    socket.onmessage = (event) => {
+        const { resposta, autor } = JSON.parse(event.data);
+        adicionarMensagem(resposta, autor);
+    };
+
+    socket.onclose = () => {
+        console.log("WebSocket desconectado. Tentando reconectar...");
+
+        setTimeout(conectarWebSocket, 1000);
+    };
+
+    socket.onerror = (erro) => {
+        console.error("Erro no WebSocket:", erro);
+        socket.close();
+    };
+}
 
 function adicionarMensagem(texto,tipo){
     const mensagem = document.createElement("div");
@@ -155,10 +179,7 @@ async function trocarModo(event) {
     }
 }
 
-socket.onmessage = (event) => {
-    const {resposta, autor} = JSON.parse(event.data);
-    adicionarMensagem(resposta,autor);
-}
+conectarWebSocket();
 
 verificar_arduino().then(status => {
     console.log(status);
