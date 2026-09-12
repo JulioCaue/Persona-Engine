@@ -225,7 +225,6 @@ The current focus is improving:
 
 - Architecture
 - Reliability
-- Testing
 - Web interface
 - AI tool integration
 - Hardware interaction
