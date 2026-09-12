@@ -37,14 +37,15 @@ def trocar_modo_audio(escolha_audio: bool):
     else:
         flag_falar_audio = False
 
-def func_falar_audio(resposta_ia,arduino_conectado):
+def func_falar_audio(resposta_ia,arduino_conectado,flag_falar_audio):
     if flag_falar_audio == True:
         #Transforma resposta em arquivo .wav
         TTS.voz_para_wav(resposta_ia)
         #O movimento da cabeça é independente, então pode ser opcional.
         if arduino_conectado:
             dublar.dublar_audio()
-        audio_player.Tocar_Wav()
+        else:
+            audio_player.Tocar_Wav() 
 
 def controla_modo(
         modo_recebido: int,
@@ -85,34 +86,35 @@ def controla_modo(
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
             if modo_recebido != 3:
-                resposta = {
-                    "resposta": mensagem,
-                    "autor": "usuario"
-                }
-                requests.post(
-                    f"{url}/receber_mensagem",
-                    json=resposta
-                )
+                if mensagem:
+                    resposta = {
+                        "resposta": mensagem,
+                        "autor": "usuario"
+                    }
+                    requests.post(
+                        f"{url}/receber_mensagem",
+                        json=resposta
+                    )
 
             try:
                 #Dá o historico para a IA e retorna resposta.
-                resposta_ia = IA.perguntar_ia(
+                resposta_ia = IA.gerenciar_ia(
                     historico = history.pull_history(),
                     flag_parar = flag_parar_modo
                 )
 
-                resposta = {
-                    "resposta": resposta_ia,
-                    "autor": "ia"
-                }
-                requests.post(
-                    f"{url}/receber_mensagem",
-                    json=resposta
-                )
-
                 if resposta_ia:
-                    func_falar_audio(resposta_ia,arduino_conectado)
+                    resposta = {
+                        "resposta": resposta_ia,
+                        "autor": "ia"
+                    }
+                    requests.post(
+                        f"{url}/receber_mensagem",
+                        json=resposta
+                    )
+                    func_falar_audio(resposta_ia,arduino_conectado,flag_falar_audio)
                 else:
+                    print(resposta_ia)
                     flag_parar_modo.set()
                     return
 
@@ -130,8 +132,3 @@ def controla_modo(
         if modo_recebido == 1 and not arduino_conectado:
             raise serial.SerialException
         tipo_interação[modo_recebido](flag_parar_modo)
-
-
-#desligadas por enquanto para evitar problemas. Estão sem implementação real ainda.
-#gerenciador.ANIMpower_on()
-#gerenciador.ANIMpowerOFF()
