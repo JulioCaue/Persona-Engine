@@ -225,7 +225,6 @@ Atualmente, o foco está em melhorar:
 
 - Arquitetura
 - Confiabilidade
-- Testes
 - Interface web
 - Integração de ferramentas de IA
 - Interação com hardware
