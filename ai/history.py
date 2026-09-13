@@ -46,6 +46,22 @@ def add_tool_usage_to_history(tool_calls):
     with open(local_arquivo,"w",encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
+def add_tool_result_to_history(tool_name,result):
+    """Adiciona mensagem ao arquivo de historico."""
+    if not os.path.exists(local_arquivo):
+        with open(local_arquivo,"w",encoding="utf-8") as file:
+            json.dump([], file, ensure_ascii=False, indent=4)
+
+    with open(local_arquivo,"r",encoding="utf-8") as file:
+        data = json.load(file)
+
+    input = {'role': "tool", "tool_name": tool_name, "content": result}
+
+    data.append(input)
+    
+    with open(local_arquivo,"w",encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
 def pull_history():
     """retorna historico completo"""
     if os.path.exists(local_arquivo):
