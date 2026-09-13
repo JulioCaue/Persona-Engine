@@ -1,156 +1,206 @@
 # Persona-Engine
 
-[ Ler em Português ](README.pt-br.md)
+[Leia em Português](README.pt-br.md)
 
-> Experimental AI assistant combining local LLMs, voice interaction, web interfaces and physical robotics.
+> Local AI assistant built in Python with Ollama, FastAPI, WebSockets, speech, tool calling, and optional Arduino-based hardware control.
 
-Persona-Engine is a personal project focused on building an interactive AI assistant that can communicate through text and voice, execute tools, interact with a web interface and control physical hardware.
+Persona-Engine is a modular AI assistant that combines a **local language model**, **real-time web communication**, **voice interaction**, **tool execution**, and **physical hardware integration** in a single project.
 
-The project is developed as an ongoing experiment in **Python, local AI, backend development and robotics**.
+The core interaction flow is already implemented: the user can interact through text or voice, the local model can answer directly or call registered tools, responses are persisted in conversation history, and output can be sent to the web interface, text-to-speech pipeline, and optional Arduino hardware.
 
-## Features
+## Engineering highlights
 
-- Local LLM integration through [Ollama](https://ollama.com/)
-- Conversational history
-- Text-based interaction
-- Speech-to-text interaction
-- Text-to-speech responses
-- Tool/function calling
-- Web interface
-- Real-time communication through WebSockets
-- REST API built with FastAPI
-- Arduino integration
-- Servo-controlled facial animation
+This project demonstrates practical work with:
+
+- Python application architecture
+- Local LLM integration with Ollama
+- Tool/function calling with explicit function registries
+- Conversation history and tool-call persistence
+- FastAPI REST endpoints
+- WebSocket-based real-time updates
+- Async/threaded coordination between backend and blocking tasks
+- Speech-to-text and text-to-speech pipelines
+- Audio processing with NumPy, SciPy, librosa and PyAudio
+- Serial communication with Arduino
+- Servo control driven by audio amplitude
 - Logging and error handling
-- Experimental audio and animation system
+- Frontend/backend integration
+
+## Main features
+
+- Local LLM through Ollama
+- Text conversation
+- Microphone input
+- Speech-to-text
+- Text-to-speech
+- Tool/function calling
+- Persistent conversation history
+- Web interface
+- FastAPI backend
+- WebSocket communication
+- Automatic WebSocket reconnection on the frontend
+- Arduino status detection
+- Optional servo-controlled facial animation
+- Audio-driven mouth movement
+- Application logging
+- Linux-first development environment
 
 ## Architecture
-
-The project is divided into several components:
 
 ```text
 Persona-Engine
 │
 ├── ai/
-│   ├── LLM communication
-│   ├── conversation history
-│   ├── prompts
-│   └── tools
+│   ├── llm.py              # model communication and tool-call orchestration
+│   ├── ferramentas.py      # registered tools and tool schemas
+│   ├── history.py          # conversation and tool history persistence
+│   └── prompts/
 │
 ├── animation/
-│   └── facial/audio animation
+│   ├── falar_audio.py      # audio-driven servo animation
+│   └── falar_mic.py        # live microphone-driven movement
 │
 ├── arduino/
-│   └── hardware control
+│   └── Arduino_Rosto.ino
 │
 ├── audios/
-│   └── audio playback
+│   └── audio_player.py
 │
 ├── interface_web/
-│   ├── FastAPI backend
-│   └── WebSocket communication
+│   ├── backend/
+│   │   └── main.py         # FastAPI backend
+│   └── frontend/
+│       ├── index.html
+│       ├── script.js
+│       └── style.css
 │
 ├── translators/
-│   ├── speech-to-text
-│   └── text-to-speech
+│   ├── speech_to_text.py
+│   └── text_to_speech.py
 │
 ├── logs/
-│   └── application logging
+│   └── log_writer.py
 │
-└── controlador.py
-    └── main interaction controller
+└── controlador.py          # application coordinator
 ```
 
-## Technologies
-
-### Backend
-
-- Python
-- FastAPI
-- Uvicorn
-- WebSockets
-- REST APIs
-- Pydantic
-- Requests
-
-### Artificial Intelligence
-
-- Ollama
-- Local Large Language Models
-- Tool/function calling
-- Conversation history
-
-### Audio
-
-- Speech-to-text
-- Text-to-speech
-- WAV audio playback
-
-### Hardware
-
-- Arduino
-- Serial communication
-- Servo motors
-
-### Development
-
-- Git
-- GitHub
-- Linux
-- Python virtual environments
-
-# Platform Support
-
-Persona-Engine is currently being developed and tested primarily on **Linux**.
-
-Other operating systems are **not officially supported at this time**, and some features may not work as expected outside Linux, especially hardware and system-level integrations.
-
-Support for additional operating systems may be added in the future.
-
-## How it works
-
-At a high level, the system works as follows:
+## How the system works
 
 ```text
 User
  │
- ├── Text ───────────────┐
- │                       │
- └── Voice → STT ────────┤
-                         ▼
-                  Persona Controller
-                         │
-                         ▼
-                    Local LLM
-                         │
-                ┌────────┴────────┐
-                │                 │
-             Response          Tool Call
-                │                 │
-                │                 ▼
-                │               Tool
-                │                 │
-                └────────┬────────┘
-                         ▼
-                  Response / TTS
-                         │
-              ┌──────────┴──────────┐
-              ▼                     ▼
-          Web Interface          Hardware
-                                  Arduino
-                                     │
-                                   Servos
+ ├── Text ─────────────────────┐
+ │                             │
+ └── Voice → Speech-to-Text ───┤
+                               ▼
+                       Persona Controller
+                               │
+                               ▼
+                           Local LLM
+                               │
+                   ┌───────────┴───────────┐
+                   │                       │
+                Response                Tool Call
+                   │                       │
+                   │                       ▼
+                   │                  Registered Tool
+                   │                       │
+                   └───────────┬───────────┘
+                               ▼
+                     Final model response
+                               │
+                 ┌─────────────┼─────────────┐
+                 ▼             ▼             ▼
+            Web interface      TTS        Hardware
+                                │             │
+                                ▼             ▼
+                              Audio         Arduino
+                                             │
+                                           Servos
 ```
+
+## Tool calling
+
+Tools are defined separately from the model orchestration logic.
+
+Each tool has:
+
+1. A schema describing what the model is allowed to call.
+2. A registered Python function responsible for execution.
+3. A persistent history entry recording the tool call and its result.
+
+This keeps the model-facing tool definition separate from the actual executable function registry.
+
+Current tools include:
+
+- Playing a supported song
+- Stopping a song
+- Reading the current system time
+
+The registry can be extended with additional tools without changing the general model-calling flow.
+
+## Web backend
+
+The FastAPI backend is responsible for:
+
+- Serving the frontend
+- Receiving user interaction mode changes
+- Receiving and forwarding AI responses
+- Reporting Arduino connection status
+- Maintaining a WebSocket connection with the browser
+
+The frontend automatically attempts to reconnect when the WebSocket connection is lost.
+
+## Voice and audio
+
+Persona-Engine supports:
+
+- Speech-to-text through microphone input
+- Text-to-speech output
+- WAV playback
+- Audio amplitude analysis
+- Servo movement based on real-time or generated audio
+
+Text-to-speech currently uses `espeak-ng`, while microphone transcription uses the Python `SpeechRecognition` package.
+
+## Hardware
+
+Arduino support is optional.
+
+When connected, the hardware layer can:
+
+- Detect the serial device
+- Send servo positions through serial communication
+- Move the mouth based on microphone or generated audio amplitude
+- Coordinate simple facial movement with spoken output
+
+The software can still run without the Arduino for software-only testing.
 
 ## Requirements
 
+### Python
+
 - Python 3.10+
 - Ollama
-- A compatible local language model
-- Microphone (for voice interaction) (optional)
-- Arduino + compatible hardware (optional)
+- A compatible local model
 
-The project can run without the Arduino for software-only testing.
+Install Python dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+### System dependencies
+
+Some audio features depend on native system packages.
+
+At minimum, you may need:
+
+- `espeak-ng`
+- PortAudio / audio development libraries required by PyAudio
+- Working microphone/audio output support
+
+Exact package names depend on your Linux distribution.
 
 ## Installation
 
@@ -179,81 +229,64 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Install and start Ollama, then download a compatible model.
-
-For example:
+Install and start Ollama, then pull the model currently used by the project:
 
 ```bash
 ollama pull qwen2.5:3b
 ```
 
-The model configured by the current implementation can be changed in:
-
-```text
-ai/llm.py
-```
-
 ## Running the web interface
 
-Start the FastAPI application with:
+Start the FastAPI application:
 
 ```bash
 uvicorn interface_web.backend.main:app --reload
 ```
 
-The web interface should then be available at:
+Then open:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Hardware
+## Platform support
 
-Arduino functionality is optional.
+Persona-Engine is currently developed and tested primarily on **Linux**.
 
-When the Arduino is not connected, the software can still be used for software-only interaction.
+Other operating systems are not officially supported yet, especially for:
 
-Hardware communication is currently designed around a serial device exposed by Linux.
+- Serial device paths
+- Audio libraries
+- Microphone access
+- Arduino integration
+- System-level TTS
 
-## Project status
+## Current status
 
-Persona-Engine is an **active experimental project**.
+The project's core interaction flow is implemented.
 
-The architecture and features are still evolving. Some components are prototypes and may change as the project develops.
+The current codebase already supports:
 
-The current focus is improving:
+- Local AI responses
+- Tool calling
+- Persistent conversation history
+- Tool-result history
+- Web interaction
+- WebSocket updates
+- Voice input/output
+- Optional hardware integration
 
-- Architecture
-- Reliability
-- Web interface
-- AI tool integration
-- Hardware interaction
-- Documentation
 
-## Demo
 
-A demonstration of the project is planned to show:
-
-1. The web interface
-2. A text conversation with the local LLM
-3. Tool execution
-4. Voice interaction
-5. The AI response being converted to speech
-6. The physical head reacting to the response
 
 ## Why I built this
 
-I built Persona-Engine because I wanted to create something I thought was genuinely interesting while challenging myself to learn by building it.
+Persona-Engine started as a way to build something I genuinely wanted to use while learning through implementation instead of isolated exercises.
 
-The project started as an experiment and continues to grow into a way to study Python, backend development, local LLMs, audio processing, and robotics in a single system.
+It became a project that brings together backend development, local AI, real-time communication, audio processing, hardware integration, and application architecture in one codebase.
 
 ## Author
 
 **Cauê**
 
-GitHub:
-https://github.com/JulioCaue
-
----
-
-> This project is developed for learning and experimentation.
+GitHub: https://github.com/JulioCaue
