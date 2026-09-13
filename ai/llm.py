@@ -13,14 +13,6 @@ import threading
 
 musica_atual: str
 
-musicas = [
-    "daisy bell",
-    "hidden in the sand",
-    "hello world",
-    "sleeping in the cold below",
-    "twist"
-]
-
 caminho_prompt_sistema = "ai/prompts/sistema/system_prompts.py"
 
 if os.path.exists(caminho_prompt_sistema):
@@ -30,54 +22,10 @@ if os.path.exists(caminho_prompt_sistema):
 else: 
     prompt_sistema = ""
 
-
-tocar_musica_tool = {
-    "type": "function",
-    "function": {
-        "name": "tocar_musica",
-        "description": """
-        Toca uma música.
-        Interprete o que o usuário quis dizer e escolha a música
-        disponível que mais corresponde ao pedido, mesmo que ele
-        escreva o nome de forma diferente ou com pequenos erros.
-        """,
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "nome": {
-                    "type": "string",
-                    "enum": musicas
-                }
-            },
-            "required": ["nome"]
-        }
-    }
-}
-
-parar_musica_tool = {
-    "type": "function",
-    "function": {
-        "name": "parar_musica",
-        "description": """
-        Pare uma música.
-        Interprete o que o usuário quis dizer e escolha a ultima música
-        que o usuario pediu.
-        """,
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "nome": {
-                    "type": "string",
-                    "enum": musicas
-                }
-            },
-            "required": ["nome"]
-        }
-    }
-}
-
-def chamada_ia(prompt_sistema,historico):
+def chamar_ia(prompt_sistema, historico, tools = None):
     """faz a chamada para a IA"""
+    if tools == None:
+        tools = ferramentas.TOOLS
     return chat(
     model='qwen2.5:3b',
     messages=[
@@ -86,51 +34,63 @@ def chamada_ia(prompt_sistema,historico):
         *historico,
         ],
     think= False,
-    tools=[tocar_musica_tool,parar_musica_tool],
+    tools = tools,
     keep_alive="5m"
     )
 
-def perguntar_ia(
+def gerenciar_ia(
     historico,
     flag_parar: threading.Event):
 
 
     """gerencia retorno da resposa da IA."""
 
+    tool_calls = []
+
     if not prompt_sistema:
         erro = "Arquivo de prompt do sistema não foi encontrado."
         log_writer.write(__name__,erro)
         print(erro)
-        return
+        return str(f"Ocorreu um erro com o prompt de sistema: {erro}")
     
-    resposta = chamada_ia(prompt_sistema,historico)
+    resposta = chamar_ia(prompt_sistema,historico)
 
     if resposta.message.tool_calls:
         for chamada in resposta.message.tool_calls:
             try:
-                print("Ferramenta escolhida:", chamada.function.name)
-                print("Argumentos:", chamada.function.arguments)
                 if chamada.function.name:
                     nome_funcao = chamada.function.name
-                    funcao = getattr(ferramentas, nome_funcao)
+                    funcao = ferramentas.FUNCOES.get(nome_funcao)
                     argumentos = chamada.function.arguments
-                    resultado = funcao(**argumentos)
-                    print("Resultado:", resultado)
+                    if funcao is not None:
+                        resultado = funcao(**argumentos)
+                    else:
+                        raise IndexError("Essa funcao nao foi encontrada, ou nao existe.")
+                    
             except Exception as e:
-                mensagem_de_erro = (
+                resultado = (
                     f"Erro na ferramenta '{chamada.function.name}' com argumentos {chamada.function.arguments}: {e}\n"
                 )
-            input = {'role': 'tool', 'content': mensagem_de_erro}
-            historico.append(input)
-            resposta = chamada_ia(prompt_sistema,historico)
-            history.add_message_to_history(mensagem_de_erro, "tool")
-            print ("passou de resposta no erro")
+                log_writer.write(__name__,resultado)
 
-    print (f"resposta atual:  {resposta.message.content}\n\n")
+            tool_calls.append( {
+                "type": "function",
+                "function": {
+                "name": nome_funcao,
+                "arguments": argumentos
+                }
+            })
+
+        history.add_tool_usage_to_history(tool_calls)
+        history.add_message_to_history(resultado,"tool")
+        historico = history.pull_history()
+        resposta = chamar_ia(prompt_sistema,historico)
+
+
     if not flag_parar.is_set() and resposta.message.content:
-        mensagem_final = resposta.message.content
-        print(f"\n\nchegou em mensagem final: {mensagem_final}\n\n")
+        ai_output = resposta.message.content
+        print(f"\n\nchegou em mensagem final: {ai_output}\n\n")
         #Salva mensagem da IA no historico também.
-        history.add_message_to_history(mensagem_final,"assistant")
+        history.add_message_to_history(ai_output,"assistant")
 
-        return str(mensagem_final)
+        return str(ai_output)
