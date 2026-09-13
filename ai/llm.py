@@ -24,7 +24,7 @@ else:
 
 def chamar_ia(prompt_sistema, historico, tools = None):
     """faz a chamada para a IA"""
-    if tools == None:
+    if tools is None:
         tools = ferramentas.TOOLS
     return chat(
     model='qwen2.5:3b',
@@ -80,9 +80,8 @@ def gerenciar_ia(
                 "arguments": argumentos
                 }
             })
-
-        history.add_tool_usage_to_history(tool_calls)
-        history.add_message_to_history(resultado,"tool")
+            history.add_tool_usage_to_history(tool_calls)
+            history.add_tool_result_to_history(nome_funcao,resultado)
         historico = history.pull_history()
         resposta = chamar_ia(prompt_sistema,historico)
 
