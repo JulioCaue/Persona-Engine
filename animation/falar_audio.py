@@ -3,12 +3,10 @@ Arquivo usado para enviar comandos ao arduino.
 Usa volume no arquivo wav para criar comandos para os servos.
 """
 
-
+import requests
 import librosa
 import numpy as np
-import serial
 from logs import log_writer
-from audios import audio_player
 
 #suprimir mensagens de erros do ALSA
 from ctypes import cdll, CFUNCTYPE, c_char_p, c_int
@@ -37,7 +35,7 @@ def dublar_audio():
     boca_min_pos = 40
     boca_max_pos = 140
     RMS_MAX = 0.3
-    ALPHA = 0.35
+    ALPHA = 0.6
     angulo_anterior = float(boca_min_pos)
 
     # --- variaveis de audio ---
@@ -54,44 +52,49 @@ def dublar_audio():
     frame_start = 0
 
     # --- inicio da conexão ---
-    with serial.Serial(PORTA_NOME, BAUD_RATE, timeout=2) as ser:
-        print (f"Conectado com arduino na porta {PORTA_NOME}")
+    try:
+        while frame_start < len(y):
+            chunk_audio = y[frame_start : frame_start + TAMANHO_CHUNK]
+            
+            if len(chunk_audio) < TAMANHO_CHUNK:
+                chunk_audio = np.pad(
+                    chunk_audio, (0, TAMANHO_CHUNK - len(chunk_audio))
+                )
 
-        audio_player.Tocar_Wav()
+            rms = np.sqrt(np.mean(chunk_audio**2))
 
-        try:
-            while frame_start < len(y):
-                chunk_audio = y[frame_start : frame_start + TAMANHO_CHUNK]
-                
-                if len(chunk_audio) < TAMANHO_CHUNK:
-                    chunk_audio = np.pad(
-                        chunk_audio, (0, TAMANHO_CHUNK - len(chunk_audio))
-                    )
+            if np.isnan(rms):
+                rms = 0.0
 
-                rms = np.sqrt(np.mean(chunk_audio**2))
+            #suaviza o angulo atual para movimentos menos brutos
+            angulo_calculado = boca_min_pos + (rms / RMS_MAX) * (boca_max_pos - boca_min_pos)
+            angulo_suavizado = ALPHA * angulo_calculado + (1 - ALPHA) * angulo_anterior
+            angulo_anterior = angulo_suavizado
+            angulo_final = int(round(angulo_suavizado))
 
-                if np.isnan(rms):
-                    rms = 0.0
+            #transforma angulo final em valor que bottango entende (entre 0.0 e 1.0)
+            valor_angulo_final = (angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos)
+            valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
 
-                #suaviza o angulo atual para movimentos menos brutos
-                angulo_calculado = boca_min_pos + (rms / RMS_MAX) * (boca_max_pos - boca_min_pos)
-                angulo_suavizado = ALPHA * angulo_calculado + (1 - ALPHA) * angulo_anterior
-                angulo_anterior = angulo_suavizado
-                angulo_final = int(round(angulo_suavizado))
+            #teste de envio para bottango
+            respose = requests.put(
+                "http://localhost:59224/ControlInput/",
+                json={
+                    "identifier": "moverBoca",
+                    "value": valor_angulo_final
+                }
+            )
 
-                boca_aberta = True if angulo_final > boca_min_pos else False
+            respose.raise_for_status()
 
-                #print(f"RMS: {rms:.4f} | Aberta: {boca_aberta} | Ângulo: {angulo_final}°")
+            stream.write(chunk_audio.astype(np.float32).tobytes())
 
-                stream.write(chunk_audio.astype(np.float32).tobytes())
-                # envia movimento na ordem boca > olho esquerdo > olho direito > palpebra
-                ser.write(f"<{angulo_final},90,90,40>".encode('utf-8'))
+            frame_start += TAMANHO_CHUNK
 
-                frame_start += TAMANHO_CHUNK
+    except Exception as e:
+        log_writer.write(__name__,e)
 
-        except Exception as e:
-            log_writer.write(__name__,e)
-        finally:
-            stream.stop_stream()
-            stream.close()
-            pa.terminate()
+    finally:
+        stream.stop_stream()
+        stream.close()
+        pa.terminate()
