@@ -114,7 +114,6 @@ def controla_modo(
                     )
                     func_falar_audio(resposta_ia,arduino_conectado,flag_falar_audio)
                 else:
-                    print(resposta_ia)
                     flag_parar_modo.set()
                     return
 
