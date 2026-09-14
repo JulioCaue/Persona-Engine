@@ -76,7 +76,7 @@ def dublar_audio():
             valor_angulo_final = (angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos)
             valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
 
-            #teste de envio para bottango
+            #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
             respose = requests.put(
                 "http://localhost:59224/ControlInput/",
                 json={
