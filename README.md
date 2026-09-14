@@ -60,8 +60,8 @@ Persona-Engine
 │   ├── falar_audio.py      # audio-driven servo animation
 │   └── falar_mic.py        # live microphone-driven movement
 │
-├── arduino/
-│   └── Arduino_Rosto.ino
+│
+│
 │
 ├── audios/
 │   └── audio_player.py

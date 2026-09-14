@@ -60,8 +60,8 @@ Persona-Engine
 │   ├── falar_audio.py      # animação dos servos com áudio gerado
 │   └── falar_mic.py        # movimento ao vivo baseado no microfone
 │
-├── arduino/
-│   └── Arduino_Rosto.ino
+│
+│
 │
 ├── audios/
 │   └── audio_player.py
