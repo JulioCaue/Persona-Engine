@@ -103,20 +103,20 @@ Usuário
                  Resposta                Tool Call
                     │                       │
                     │                       ▼
-                    │               Ferramenta registrada
+                    │             Ferramenta registrada
                     │                       │
                     └───────────┬───────────┘
                                 ▼
                        Resposta final da IA
                                 │
-                  ┌─────────────┼─────────────┐
-                  ▼             ▼             ▼
-             Interface web      TTS        Hardware
-                                 │             │
-                                 ▼             ▼
-                               Áudio         Arduino
-                                              │
-                                            Servos
+                  ┌─────────────┼──────────────┐
+                  ▼             ▼              ▼
+             Interface web     TTS          Bottango
+                                │              │
+                                ▼              ▼
+                              Áudio         Arduino
+                                               │
+                                             Servos
 ```
 
 ## Tool calling

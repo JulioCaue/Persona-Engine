@@ -100,10 +100,10 @@ User
                                │
                    ┌───────────┴───────────┐
                    │                       │
-                Response                Tool Call
+                Response               Tool Call
                    │                       │
                    │                       ▼
-                   │                  Registered Tool
+                   │                 Registered Tool
                    │                       │
                    └───────────┬───────────┘
                                ▼
@@ -111,12 +111,12 @@ User
                                │
                  ┌─────────────┼─────────────┐
                  ▼             ▼             ▼
-            Web interface      TTS        Hardware
-                                │             │
-                                ▼             ▼
-                              Audio         Arduino
+            Web interface     TTS         Bottango
+                               │             │
+                               ▼             ▼
+                             Audio        Arduino
                                              │
-                                           Servos
+                                          Servos
 ```
 
 ## Tool calling
