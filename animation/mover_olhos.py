@@ -136,3 +136,6 @@ def seguir_rosto():
 
     cap.release()
     cv.destroyAllWindows()
+
+
+seguir_rosto()
