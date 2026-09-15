@@ -10,7 +10,6 @@ import serial
 import threading
 import requests
 import traceback
-from animation import gerenciador # trocar nome
 from ai import history
 from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
