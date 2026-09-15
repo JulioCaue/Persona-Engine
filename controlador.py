@@ -13,16 +13,14 @@ import traceback
 from ai import history
 from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
-from animation import falar_audio as dublar
-from animation import falar_mic
+from animation import mover_boca
 from audios import audio_player
 from logs import log_writer
 
 #Dicionario util para caso expansão seja necessaria.
 tipo_interação = {
-1: falar_mic.imitar_fala,
+1: mover_boca.imitar_fala,
 2: STT.pegar_transcricao
-# terceiro é tipo é manual, no codigo, por simplicidade.
 }
 
 url = "http://127.0.0.1:8000"
@@ -42,7 +40,7 @@ def func_falar_audio(resposta_ia,arduino_conectado,flag_falar_audio):
         TTS.voz_para_wav(resposta_ia)
         #O movimento da cabeça é independente, então pode ser opcional.
         if arduino_conectado:
-            dublar.dublar_audio()
+            mover_boca.falar_audio()
         else:
             audio_player.Tocar_Wav() 
 
