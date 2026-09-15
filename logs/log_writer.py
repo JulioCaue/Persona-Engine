@@ -19,7 +19,7 @@ def write(nome_arquivo,error_line):
     caminho_pastas = "logs/errors/"
     ftype = ".txt"
     agora = datetime.now()
-    dia_hoje = agora.strftime("%d-%m-%Y")
+    dia_hoje = agora.strftime("%m-%d-%Y")
     hora_agora = agora.strftime("%H:%M")
 
     caminho_arquivo = f"{caminho_pastas}{dia_hoje}{ftype}"
