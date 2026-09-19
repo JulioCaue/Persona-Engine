@@ -13,13 +13,13 @@ import traceback
 from ai import history
 from translators import text_to_speech as TTS
 from translators import speech_to_text as STT
-from animation import mover_boca
+from animation import boca
 from audios import audio_player
 from logs import log_writer
 
 #Dicionario util para caso expansão seja necessaria.
 tipo_interação = {
-1: mover_boca.imitar_fala,
+1: boca.sincronizar_com_microfone,
 2: STT.pegar_transcricao
 }
 
@@ -40,7 +40,7 @@ def func_falar_audio(resposta_ia,arduino_conectado,flag_falar_audio):
         TTS.voz_para_wav(resposta_ia)
         #O movimento da cabeça é independente, então pode ser opcional.
         if arduino_conectado:
-            mover_boca.falar_audio()
+            boca.sincronizar_com_audio()
         else:
             audio_player.Tocar_Wav() 
 
@@ -82,6 +82,7 @@ def controla_modo(
                 break
             #Coloca mensagem do usuario no historico
             history.add_message_to_history(mensagem,"user")
+
             if modo_recebido != 3:
                 if mensagem:
                     resposta = {

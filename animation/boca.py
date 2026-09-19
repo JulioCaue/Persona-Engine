@@ -15,7 +15,7 @@ boca_min_pos = 40
 boca_max_pos = 140
 
 
-def falar_audio():
+def sincronizar_com_audio():
     """
     move a boca conforme um arquivo de audio pré-criado.
     """
@@ -82,7 +82,7 @@ def falar_audio():
         pa.terminate()
 
 
-def imitar_fala(parar_modo:threading.Event):
+def sincronizar_com_microfone(parar_modo:threading.Event):
     """
     Envia comandos de servo para arduino com base em volume da voz em loop até detectar troca de flag.
     """

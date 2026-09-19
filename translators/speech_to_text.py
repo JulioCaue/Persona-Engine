@@ -20,7 +20,7 @@ import speech_recognition as sr
 
 def pegar_transcricao(parar_modo):
     """
-    cria wav a partir de audio captado.
+    retorna texto a partir de audio captado.
     """
     recognizer = sr.Recognizer()
     TIMEOUT_ESPERAR_FALA = 3
