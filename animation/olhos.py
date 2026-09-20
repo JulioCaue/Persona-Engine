@@ -22,7 +22,7 @@ except Exception:
 
 #continua normalmente
 
-class EyeTracker:
+class FaceTracker:
     def __init__(self) -> None:
         self.cap = cv.VideoCapture("/dev/video0") #caminho da camera
         self.FaceDetector = mp.tasks.vision.FaceDetector
@@ -47,7 +47,7 @@ class EyeTracker:
         self.angulo_max_direita = 30
         self.angulo_max_esquerda = 170
 
-    def pegar_face_centro_atual(self):
+    def pegar_rosto_centro_atual(self):
         """Olha o frame atual da webcam e retorna o centro de um rosto detectado."""
 
 
@@ -96,69 +96,51 @@ class EyeTracker:
             return centro_x, largura
 
 
-    def seguir_rosto(self):
+    def seguir_rosto(self,resultado_centro_rosto):
         """
         segue o rosto do usuario com os olhos (horizontal apenas).
         """
 
-        with self.detector:
-            
-            if not self.cap.isOpened():
-                print("Camera não foi encontrada aberta")
-                exit()
-                return
-            # --- inicio da conexão ---
-            try:
-                while True:
-                    resultado_centro_rosto = self.pegar_face_centro_atual()
+        if not self.cap.isOpened():
+            print("Camera não foi encontrada aberta")
+            exit()
+            return
+        # --- inicio da conexão ---
+        try:
 
-                    
+            if resultado_centro_rosto:
+                centro_x, largura = resultado_centro_rosto
 
-                    if resultado_centro_rosto:
-                        centro_x, largura = resultado_centro_rosto
+                angulo_atual = self.angulo_max_direita + (centro_x / largura) * (self.angulo_max_esquerda - self.angulo_max_direita)
 
-                        angulo_atual = self.angulo_max_direita + (centro_x / largura) * (self.angulo_max_esquerda - self.angulo_max_direita)
+                if not self.angulo_anterior:
+                    self.angulo_anterior = angulo_atual
+                    angulo_suavizado = angulo_atual
 
-                        if not self.angulo_anterior:
-                            self.angulo_anterior = angulo_atual
-                            angulo_suavizado = angulo_atual
+                else:
+                    #suaviza o angulo atual para movimentos menos brutos
+                    angulo_suavizado = (angulo_atual * self.ALPHA) + (self.angulo_anterior * (1 - self.ALPHA))
 
-                        else:
-                            #suaviza o angulo atual para movimentos menos brutos
-                            angulo_suavizado = (angulo_atual * self.ALPHA) + (self.angulo_anterior * (1 - self.ALPHA))
-
-                        #transforma angulo final em valor que bottango entende (entre 0.0 e 1.0)
-                        #conta: valor_bottango = (angulo - angulo_min) / (angulo_max - angulo_min)
-                        
-                        valor_angulo_final = round(
-                            (
-                                angulo_suavizado - self.angulo_max_direita
-                            ) / (
-                                self.angulo_max_esquerda - self.angulo_max_direita
-                            ), 3
-                        )
+                #transforma angulo final em valor que bottango entende (entre 0.0 e 1.0)
+                #conta: valor_bottango = (angulo - angulo_min) / (angulo_max - angulo_min)
+                
+                valor_angulo_final = round(
+                    (
+                        angulo_suavizado - self.angulo_max_direita
+                    ) / (
+                        self.angulo_max_esquerda - self.angulo_max_direita
+                    ), 3
+                )
 
 
-                        valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
+                valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
 
-                        #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
+                #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
 
-                        if abs(valor_angulo_final - self.angulo_anterior) > 0.010:
-                            print(valor_angulo_final)
-                            response = requests.put(
-                                "http://localhost:59224/ControlInput/",
-                                json={
-                                    "identifier": "mexerOlhos",
-                                    "value": valor_angulo_final
-                                }
-                            )
-
-                            response.raise_for_status()
-                        self.angulo_anterior = valor_angulo_final
-
-            except KeyboardInterrupt:
-                try:
-                    response = requests.put(
+                if abs(valor_angulo_final - self.angulo_anterior) > 0.010:
+                    print(valor_angulo_final)
+                    #apenas print por enquanto para simular hardware sem precisar conectar
+                    """response = requests.put(
                         "http://localhost:59224/ControlInput/",
                         json={
                             "identifier": "mexerOlhos",
@@ -166,14 +148,27 @@ class EyeTracker:
                         }
                     )
 
-                    response.raise_for_status()
+                    response.raise_for_status()"""
+                self.angulo_anterior = valor_angulo_final
 
-                except Exception as e:
-                    log_writer.write(__name__, f"Ocorreu um problema durante o fechamento do track de olhos: {e}")
+        except KeyboardInterrupt:
+            try:
+                response = requests.put(
+                    "http://localhost:59224/ControlInput/",
+                    json={
+                        "identifier": "mexerOlhos",
+                        "value": valor_angulo_final
+                    }
+                )
+
+                response.raise_for_status()
 
             except Exception as e:
-                print(e)
-                log_writer.write(__name__, e)
+                log_writer.write(__name__, f"Ocorreu um problema durante o fechamento do track de olhos: {e}")
+
+        except Exception as e:
+            print(e)
+            log_writer.write(__name__, e)
 
 
         self.cap.release()
