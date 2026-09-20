@@ -1,4 +1,5 @@
 from olhos import FaceTracker
+import boca
 import cv2 as cv
 
 
@@ -12,8 +13,14 @@ dict_anim = {
     "eyebrow_value": 0.27
 }
 
+mouth_options = {
+    "audio": boca.sincronizar_com_audio,
+    "microfone": boca.sincronizar_com_microfone
+}
+
 class AnimControl():
     def __init__(self) -> None:
+        self.is_speaking: bool
         self.eye_weight = None
         self.mouth_weight = None
         self.eyebrow_weight = None
@@ -64,6 +71,9 @@ class AnimControl():
         # usar while not parar_modo.is_set() no loop real?
         with self.detector:
             while True: #seria o loop principal pra TODAS AS ANIM
+                if self.is_speaking:
+                    #speech type will be string
+                    mouth_options[speech_type]()
                 #movimento da boca
                 self.olhos.seguir_rosto(resultado_centro_rosto)
                 #movimento da sobrancelha
