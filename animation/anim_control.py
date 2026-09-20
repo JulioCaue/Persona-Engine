@@ -1,12 +1,13 @@
-from olhos import FaceTracker
-import boca
+from animation.olhos import FaceTracker
+import animation.boca as boca
 import cv2 as cv
 
 
 #dar um dicionario?
 #controla todo o sistema de movimentação?
 
-#ESSE CODIGO AINDA É CONCEITUAL! NÃO DAR COMMIT!
+#ESSE CODIGO AINDA É CONCEITUAL! NÃO DAR COMMIT (no main branch :P)!
+#tudo aqui pode ser removido no futuro. Apenas ideias ainda. Ficará oque funcionar.
 dict_anim = {
     "eye_value": 0.92,
     "mouth_value": 0.50,
@@ -21,6 +22,7 @@ mouth_options = {
 class AnimControl():
     def __init__(self) -> None:
         self.is_speaking: bool
+        self.is_looking: bool
         self.eye_weight = None
         self.mouth_weight = None
         self.eyebrow_weight = None
@@ -63,20 +65,40 @@ class AnimControl():
             self.prev_eyebrow_value = current_eyebrow_value
 
 
-    def test_final(self):
+    def test_final(self,speech_type,is_speaking, is_looking):
         #funcao separada para teste de completa
 
-        resultado_centro_rosto = self.olhos.pegar_rosto_centro_atual()
+        #atribuições idiotas e placeholder por enquanto. Talvez sejam deletadas
+        self.is_speaking = is_speaking
+
+        self.is_looking = is_looking
 
         # usar while not parar_modo.is_set() no loop real?
         with self.detector:
             while True: #seria o loop principal pra TODAS AS ANIM
+
+                #captura cada frame, fora daqui faz só o primeiro. Quem diria!
+                resultado_centro_rosto = self.olhos.pegar_rosto_centro_atual()
+
                 if self.is_speaking:
                     #speech type will be string
                     mouth_options[speech_type]()
-                #movimento da boca
-                self.olhos.seguir_rosto(resultado_centro_rosto)
-                #movimento da sobrancelha
 
-        self.olhos.cap.release()
-        cv.destroyAllWindows()
+                #movimento da boca
+                if self.is_looking:
+                    self.olhos.seguir_rosto(resultado_centro_rosto)
+
+                #TODO movimento da sobrancelha
+
+        if self.olhos.cap or not self.is_looking:
+            self.olhos.cap.release()
+            cv.destroyAllWindows()
+
+
+controler = AnimControl()
+
+speech_type = "microfone"
+is_speaking = False
+is_looking = False
+
+controler.test_final(speech_type,is_speaking,is_looking)
