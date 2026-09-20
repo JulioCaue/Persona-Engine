@@ -169,7 +169,3 @@ class FaceTracker:
         except Exception as e:
             print(e)
             log_writer.write(__name__, e)
-
-
-        self.cap.release()
-        cv.destroyAllWindows()
