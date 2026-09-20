@@ -3,7 +3,6 @@ import librosa
 import numpy as np
 import pyaudio
 import threading
-import time
 from logs import log_writer
 
 # --- variaveis de audio ---
@@ -92,8 +91,6 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
     # olhos: 150 (esquerda), 35 (direita)
     # palpebras: 160 (abertas), 40 (fechada)
 
-    PORTA_NOME = "/dev/ttyUSB0"
-    BAUD_RATE = 115200
     CHUNK_SIZE = 128
     AUDIO_FORMAT = pyaudio.paInt16
     CHANNELS = 1
