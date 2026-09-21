@@ -19,15 +19,22 @@ def sincronizar_com_audio():
     move a boca conforme um arquivo de audio pré-criado.
     """
 
+    y, sr = librosa.load(ARQUIVO_AUDIO, sr=44100)
+
+    AUDIO_FORMAT = pyaudio.paFloat32
+    CHANNELS = 1
+    RATE = int(sr)
+
     RMS_MAX = 0.3
     ALPHA = 0.6
     angulo_anterior = float(boca_min_pos)
 
-    y, sr = librosa.load(ARQUIVO_AUDIO, sr=44100)
-
     pa = pyaudio.PyAudio()
     stream = pa.open(
-        format=pyaudio.paFloat32, channels=1, rate=int(sr), output=True,frames_per_buffer=TAMANHO_CHUNK
+        format=AUDIO_FORMAT, 
+        channels= CHANNELS, 
+        rate= RATE, 
+        output=True,frames_per_buffer=TAMANHO_CHUNK
     )
 
     frame_start = 0
@@ -73,6 +80,8 @@ def sincronizar_com_audio():
 
             frame_start += TAMANHO_CHUNK
 
+            return frame_start
+
     except Exception as e:
         log_writer.write(__name__,e)
 
@@ -92,16 +101,16 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
     # olhos: 150 (esquerda), 35 (direita)
     # palpebras: 160 (abertas), 40 (fechada)
 
-    CHUNK_SIZE = 128
+    TAMANHO_CHUNK = 128
     AUDIO_FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 16000
 
-    boca_min_pos = 40
-    boca_max_pos = 170
-
     THRESHOLD_ABRIR  = 140
     ALPHA = 0.15
+
+    boca_min_pos = 40
+    boca_max_pos = 170
 
     angulo_anterior = float(boca_min_pos)
     boca_aberta = False
@@ -112,7 +121,7 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
         channels=CHANNELS,
         rate = RATE,
         input=True,
-        frames_per_buffer=CHUNK_SIZE
+        frames_per_buffer=TAMANHO_CHUNK
     )
 
     try:
@@ -121,7 +130,7 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
         while not parar_modo.is_set():
             print(f"entrou no loop com flag {parar_modo.is_set()}")
             #ler data binaria do audio da stream do microfone
-            data = stream.read(CHUNK_SIZE,exception_on_overflow=False)
+            data = stream.read(TAMANHO_CHUNK,exception_on_overflow=False)
             
             #converter data binaria para float para evitar overflow
             audio_data=np.frombuffer(data,dtype=np.int16).astype(np.float32)
