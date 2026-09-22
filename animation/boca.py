@@ -2,7 +2,7 @@ import requests
 import librosa
 import numpy as np
 import pyaudio
-import threading
+import time
 from logs import log_writer
 
 # --- variaveis de audio ---
@@ -90,8 +90,8 @@ def sincronizar_com_audio():
         stream.close()
         pa.terminate()
 
-
-def sincronizar_com_microfone(parar_modo:threading.Event):
+#trazer parar_modo:threading.Event
+def sincronizar_com_microfone():
     """
     Envia comandos de servo para arduino com base em volume da voz em loop até detectar troca de flag.
     """
@@ -106,14 +106,12 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
     CHANNELS = 1
     RATE = 16000
 
-    THRESHOLD_ABRIR  = 140
-    ALPHA = 0.15
 
-    boca_min_pos = 40
-    boca_max_pos = 170
+    #RMS_MAX = 0.3
+    ALPHA = 0.6
 
     angulo_anterior = float(boca_min_pos)
-    boca_aberta = False
+    valor_bottango_anterior = None
 
     pa=pyaudio.PyAudio()
     stream = pa.open(
@@ -127,8 +125,8 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
     try:
         print("Microfone ativo. Fale para mover boca... (ctrl + c para parar)")
 
-        while not parar_modo.is_set():
-            print(f"entrou no loop com flag {parar_modo.is_set()}")
+        while True:
+            #print(f"entrou no loop com flag {parar_modo.is_set()}")
             #ler data binaria do audio da stream do microfone
             data = stream.read(TAMANHO_CHUNK,exception_on_overflow=False)
             
@@ -144,48 +142,47 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
 
             # -- logica de mapeamento --
             #ajustar o volume maximo dependendo da sensibilidade do microfone
-            max_volume = 250.0
+            volume_minimo = 30
+            volume_max = 500
 
-            if not boca_aberta and rms >= THRESHOLD_ABRIR:
-                boca_aberta = True
-            else:
-                boca_aberta = False
-
-            if not boca_aberta:
-                servo_angle = boca_min_pos
+            if rms <= volume_minimo:
+                intensidade = 0
 
             else:
-                #normalizar volume do som entre 0.0 e 1.0
-                normalised_volume = min(rms / max_volume, 1.0)
+                intensidade = (rms - volume_minimo) / (volume_max - volume_minimo)
+                intensidade = max(0.0, min(1.0, intensidade))
 
-                #transformar em angulo
-                servo_angle = int(boca_min_pos + normalised_volume * (boca_max_pos - boca_min_pos))
+            angulo_calculado = boca_min_pos + intensidade * (boca_max_pos - boca_min_pos)
 
             #suaviza o angulo atual para movimentos menos brutos
-            angulo_suavizado = ALPHA * servo_angle + (1 - ALPHA) * angulo_anterior
+            angulo_suavizado = ALPHA * angulo_calculado + (1 - ALPHA) * angulo_anterior
+
             angulo_anterior = angulo_suavizado
+
             angulo_final = int(round(angulo_suavizado))
 
             #transforma angulo final em valor que bottango entende (entre 0.0 e 1.0)
-            valor_angulo_final = round(
-                (angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos),
-                3 #casas decimais
-            )
-            valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
+            valor_bottango_final = (angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos)
 
-            print(valor_angulo_final)
+            valor_bottango_final = max(0.0, min(1.0, valor_bottango_final))
 
-            if not angulo_anterior or abs(valor_angulo_final - angulo_anterior) > 0.002:
-                print(f"Valor da boca: {valor_angulo_final}")
-                """respose = requests.put(
+            if not valor_bottango_anterior or abs(
+                valor_bottango_final - valor_bottango_anterior
+            ) > 0.08 or valor_bottango_final < 0.025:
+                print(f"Valor da boca: {valor_bottango_final}")
+                respose = requests.put(
                     "http://localhost:59224/ControlInput/",
                     json={
                         "identifier": "moverBoca",
-                        "value": valor_angulo_final
+                        "value": valor_bottango_final
                     }
                 )
 
-                respose.raise_for_status()"""
+                respose.raise_for_status()
+
+            valor_bottango_anterior = valor_bottango_final
+
+            time.sleep(0.02)
 
     except Exception as e:
         log_writer.write(__name__,e)
