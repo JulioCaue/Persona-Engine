@@ -1,6 +1,7 @@
 from animation.olhos import FaceTracker
 import animation.boca as boca
 import cv2 as cv
+import threading
 
 
 #dar um dicionario?
@@ -21,8 +22,9 @@ mouth_options = {
 
 class AnimControl():
     def __init__(self) -> None:
-        self.is_speaking: bool
-        self.is_looking: bool
+        self.will_speak = False
+        self.is_speaking = False
+        self.is_looking  = False
         self.eye_weight = None
         self.mouth_weight = None
         self.eyebrow_weight = None
@@ -65,11 +67,11 @@ class AnimControl():
             self.prev_eyebrow_value = current_eyebrow_value
 
 
-    def test_final(self,speech_type,is_speaking, is_looking):
+    def test_final(self,speech_type,will_speak, is_looking):
         #funcao separada para teste de completa
 
         #atribuições idiotas e placeholder por enquanto. Talvez sejam deletadas
-        self.is_speaking = is_speaking
+        self.will_speak = will_speak
 
         self.is_looking = is_looking
 
@@ -80,15 +82,18 @@ class AnimControl():
                 #captura cada frame, fora daqui faz só o primeiro. Quem diria!
                 resultado_centro_rosto = self.olhos.pegar_rosto_centro_atual()
 
-                if self.is_speaking:
+                if self.will_speak:
                     #speech type will be string
-                    mouth_options[speech_type]()
+                    if not self.is_speaking:
+                        speaker_thread = threading.Thread(target=mouth_options[speech_type])
+                        speaker_thread.start()
+                        self.is_speaking = True
 
                 #movimento da boca
                 if self.is_looking:
                     self.olhos.seguir_rosto(resultado_centro_rosto)
 
-                #TODO movimento da sobrancelha
+                #TODO movimento da sobrancelha / func da sobrancelha
 
         if self.olhos.cap or not self.is_looking:
             self.olhos.cap.release()
@@ -98,7 +103,7 @@ class AnimControl():
 controler = AnimControl()
 
 speech_type = "microfone"
-is_speaking = False
-is_looking = False
+will_speak = True
+is_looking = True
 
-controler.test_final(speech_type,is_speaking,is_looking)
+controler.test_final(speech_type,will_speak,is_looking)
