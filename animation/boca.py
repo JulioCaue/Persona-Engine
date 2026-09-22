@@ -65,7 +65,7 @@ def sincronizar_com_audio():
             valor_angulo_final = max(0.0, min(1.0, valor_angulo_final))
 
             #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
-            print(valor_angulo_final)
+            print(f"Valor da boca: {valor_angulo_final}")
             """respose = requests.put(
                 "http://localhost:59224/ControlInput/",
                 json={
@@ -176,7 +176,7 @@ def sincronizar_com_microfone(parar_modo:threading.Event):
             print(valor_angulo_final)
 
             if not angulo_anterior or abs(valor_angulo_final - angulo_anterior) > 0.002:
-                print(valor_angulo_final)
+                print(f"Valor da boca: {valor_angulo_final}")
                 """respose = requests.put(
                     "http://localhost:59224/ControlInput/",
                     json={
