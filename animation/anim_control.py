@@ -102,8 +102,9 @@ class AnimControl():
 
 controler = AnimControl()
 
+#usar isso para um possivel loop com flag da func de olhos?
 speech_type = "microfone"
 will_speak = True
-is_looking = True
+is_looking = False
 
 controler.test_final(speech_type,will_speak,is_looking)
