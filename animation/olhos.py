@@ -137,7 +137,7 @@ class FaceTracker:
 
                 #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
 
-                if abs(valor_angulo_final - self.angulo_anterior) > 0.010:
+                if abs(valor_angulo_final - self.angulo_anterior) > 0.01:
                     print(f"Valor dos olhos: {valor_angulo_final}")
                     #apenas print por enquanto para simular hardware sem precisar conectar
                     """response = requests.put(
