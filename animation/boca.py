@@ -108,7 +108,7 @@ def sincronizar_com_microfone():
 
 
     #RMS_MAX = 0.3
-    ALPHA = 0.6
+    ALPHA = 0.8
 
     angulo_anterior = float(boca_min_pos)
     valor_bottango_anterior = None
@@ -142,7 +142,7 @@ def sincronizar_com_microfone():
 
             # -- logica de mapeamento --
             #ajustar o volume maximo dependendo da sensibilidade do microfone
-            volume_minimo = 30
+            volume_minimo = 50
             volume_max = 500
 
             if rms <= volume_minimo:
@@ -159,18 +159,16 @@ def sincronizar_com_microfone():
 
             angulo_anterior = angulo_suavizado
 
-            angulo_final = int(round(angulo_suavizado))
+            angulo_final = round(angulo_suavizado)
 
             #transforma angulo final em valor que bottango entende (entre 0.0 e 1.0)
-            valor_bottango_final = (angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos)
+            valor_bottango_final = round((angulo_final - boca_min_pos) / (boca_max_pos - boca_min_pos),3)
 
             valor_bottango_final = max(0.0, min(1.0, valor_bottango_final))
 
-            if not valor_bottango_anterior or abs(
-                valor_bottango_final - valor_bottango_anterior
-            ) > 0.08 or valor_bottango_final < 0.025:
+            if not valor_bottango_anterior or abs(valor_bottango_anterior - valor_bottango_final) > 0.07:
                 print(f"Valor da boca: {valor_bottango_final}")
-                respose = requests.put(
+                """respose = requests.put(
                     "http://localhost:59224/ControlInput/",
                     json={
                         "identifier": "moverBoca",
@@ -178,11 +176,11 @@ def sincronizar_com_microfone():
                     }
                 )
 
-                respose.raise_for_status()
+                respose.raise_for_status()"""
 
-            valor_bottango_anterior = valor_bottango_final
+                valor_bottango_anterior = valor_bottango_final
 
-            time.sleep(0.02)
+            time.sleep(0.05)
 
     except Exception as e:
         log_writer.write(__name__,e)
