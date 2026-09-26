@@ -85,7 +85,7 @@ class AnimControl():
                 if self.will_speak:
                     #speech type will be string
                     if not self.is_speaking:
-                        speaker_thread = threading.Thread(target=mouth_options[speech_type])
+                        speaker_thread = threading.Thread(target=mouth_options[speech_type],daemon=True)
                         speaker_thread.start()
                         self.is_speaking = True
 
@@ -103,8 +103,8 @@ class AnimControl():
 controler = AnimControl()
 
 #usar isso para um possivel loop com flag da func de olhos?
-speech_type = "microfone"
+speech_type = "audio"
 will_speak = True
-is_looking = False
+is_looking = True
 
 controler.test_final(speech_type,will_speak,is_looking)
