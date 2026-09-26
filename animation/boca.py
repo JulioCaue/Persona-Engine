@@ -2,7 +2,6 @@ import requests
 import librosa
 import numpy as np
 import pyaudio
-import time
 from logs import log_writer
 
 # --- variaveis de audio ---
@@ -66,7 +65,7 @@ def sincronizar_com_audio():
 
             #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
             print(f"Valor da boca: {valor_angulo_final}")
-            """respose = requests.put(
+            respose = requests.put(
                 "http://localhost:59224/ControlInput/",
                 json={
                     "identifier": "moverBoca",
@@ -74,13 +73,11 @@ def sincronizar_com_audio():
                 }
             )
 
-            respose.raise_for_status()"""
+            respose.raise_for_status()
 
             stream.write(chunk_audio.astype(np.float32).tobytes())
 
             frame_start += TAMANHO_CHUNK
-
-            return frame_start
 
     except Exception as e:
         log_writer.write(__name__,e)
@@ -142,7 +139,7 @@ def sincronizar_com_microfone():
 
             # -- logica de mapeamento --
             #ajustar o volume maximo dependendo da sensibilidade do microfone
-            volume_minimo = 50
+            volume_minimo = 100
             volume_max = 500
 
             if rms <= volume_minimo:
@@ -168,7 +165,7 @@ def sincronizar_com_microfone():
 
             if not valor_bottango_anterior or abs(valor_bottango_anterior - valor_bottango_final) > 0.07:
                 print(f"Valor da boca: {valor_bottango_final}")
-                """respose = requests.put(
+                respose = requests.put(
                     "http://localhost:59224/ControlInput/",
                     json={
                         "identifier": "moverBoca",
@@ -176,11 +173,9 @@ def sincronizar_com_microfone():
                     }
                 )
 
-                respose.raise_for_status()"""
+                respose.raise_for_status()
 
                 valor_bottango_anterior = valor_bottango_final
-
-            time.sleep(0.05)
 
     except Exception as e:
         log_writer.write(__name__,e)
