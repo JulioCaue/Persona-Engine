@@ -1,5 +1,6 @@
 from animation.olhos import FaceTracker
 import animation.boca as boca
+import animation.palpebra as palpebra
 import cv2 as cv
 import threading
 
@@ -22,12 +23,10 @@ mouth_options = {
 
 class AnimControl():
     def __init__(self) -> None:
+        self.blink_time = 3.0
         self.will_speak = False
         self.is_speaking = False
         self.is_looking  = False
-        self.eye_weight = None
-        self.mouth_weight = None
-        self.eyebrow_weight = None
 
         self.prev_eye_value = None
         self.prev_mouth_value = None
@@ -35,6 +34,8 @@ class AnimControl():
 
         self.olhos = FaceTracker()
         self.detector = self.olhos.detector
+
+        palpebra.piscar()
 
     def get_mouth_pos(self):
         #aqui fazer a atual posição da boca no loop (loop maior que pega tudo)
@@ -93,8 +94,6 @@ class AnimControl():
                 if self.is_looking:
                     self.olhos.seguir_rosto(resultado_centro_rosto)
 
-                #TODO movimento da sobrancelha / func da sobrancelha
-
         if self.olhos.cap or not self.is_looking:
             self.olhos.cap.release()
             cv.destroyAllWindows()
@@ -105,6 +104,6 @@ controler = AnimControl()
 #usar isso para um possivel loop com flag da func de olhos?
 speech_type = "audio"
 will_speak = True
-is_looking = True
+is_looking = False
 
 controler.test_final(speech_type,will_speak,is_looking)
