@@ -65,7 +65,7 @@ def sincronizar_com_audio():
 
             #Envia angulos direto para o bottango pois o codigo do arduino que observa a porta serial é substituido quando uma animação do arduino é tocada.
             print(f"Valor da boca: {valor_angulo_final}")
-            """respose = requests.put(
+            respose = requests.put(
                 "http://localhost:59224/ControlInput/",
                 json={
                     "identifier": "moverBoca",
@@ -73,7 +73,7 @@ def sincronizar_com_audio():
                 }
             )
 
-            respose.raise_for_status()"""
+            respose.raise_for_status()
 
             stream.write(chunk_audio.astype(np.float32).tobytes())
 
