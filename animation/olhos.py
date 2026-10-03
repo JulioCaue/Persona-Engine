@@ -153,7 +153,7 @@ class FaceTracker:
 
         except KeyboardInterrupt:
             try:
-                response = requests.put(
+                """response = requests.put(
                     "http://localhost:59224/ControlInput/",
                     json={
                         "identifier": "mexerOlhos",
@@ -161,7 +161,7 @@ class FaceTracker:
                     }
                 )
 
-                response.raise_for_status()
+                response.raise_for_status()"""
 
             except Exception as e:
                 log_writer.write(__name__, f"Ocorreu um problema durante o fechamento do track de olhos: {e}")
